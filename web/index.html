@@ -1,0 +1,875 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RevmeAI — Local Business Reputation & Digital Operating System</title>
+    
+    <!-- Google Fonts & Tailwind CSS -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        background-color: #030712;
+      }
+      h1, h2, h3, .font-heading {
+        font-family: 'Outfit', sans-serif;
+      }
+      .glass-card {
+        background: rgba(15, 23, 42, 0.75);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+      .glass-card-hover {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      .glass-card-hover:hover {
+        border-color: rgba(245, 158, 11, 0.4);
+        transform: translateY(-2px);
+        box-shadow: 0 12px 30px -10px rgba(245, 158, 11, 0.15);
+      }
+      .star-glow {
+        filter: drop-shadow(0 0 14px rgba(245, 158, 11, 0.6));
+      }
+    </style>
+    <!-- Razorpay SDK -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  </head>
+  <body class="bg-slate-950 text-slate-100 min-h-screen selection:bg-amber-500 selection:text-slate-950 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(245,158,11,0.12),rgba(255,255,255,0))]">
+    <div id="app"></div>
+
+    <!-- Add Profile Modal -->
+    <div id="add-modal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+      <div class="glass-card rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4 text-left border border-slate-700/80">
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg font-bold text-white font-heading">Add New Business Profile</h3>
+          <button id="close-modal-btn" class="text-slate-400 hover:text-white text-sm font-bold">✕</button>
+        </div>
+        <form id="new-biz-form" class="space-y-3">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Business Name *</label>
+            <input type="text" id="new-biz-name" required placeholder="e.g. Gourmet Pizza Studio" class="w-full bg-slate-950/90 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-amber-400 transition" />
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Category</label>
+            <input type="text" id="new-biz-cat" placeholder="e.g. Restaurant, Salon, Dentist" class="w-full bg-slate-950/90 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-amber-400 transition" />
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">City</label>
+            <input type="text" id="new-biz-city" placeholder="e.g. San Francisco" class="w-full bg-slate-950/90 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-amber-400 transition" />
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Google Review Link</label>
+            <input type="url" id="new-biz-link" placeholder="https://g.page/r/your-review-link/review" class="w-full bg-slate-950/90 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-amber-400 transition" />
+          </div>
+          <button type="submit" class="w-full bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 text-slate-950 font-extrabold py-3 rounded-xl text-xs transition shadow-lg shadow-amber-500/20">Create Business Profile</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Subscription Plans Modal -->
+    <div id="sub-modal" class="hidden fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
+      <div class="glass-card rounded-3xl p-6 md:p-8 max-w-3xl w-full shadow-2xl space-y-6 text-left border border-slate-700/80 max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between">
+          <div>
+            <span class="text-[10px] font-extrabold text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full uppercase border border-amber-500/20 tracking-wider">Access Plans & Pricing</span>
+            <h3 class="text-2xl font-extrabold text-white font-heading mt-1">Upgrade Your RevmeAI Account</h3>
+          </div>
+          <button id="close-sub-modal-btn" class="text-slate-400 hover:text-white text-sm font-bold bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-700">✕ Close</button>
+        </div>
+
+        <div id="sub-active-badge" class="hidden bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 p-3 rounded-2xl text-xs font-semibold flex items-center gap-2">
+          <span>✓</span> <span id="sub-active-text">Active Subscription</span>
+        </div>
+
+        <div id="sub-error" class="hidden bg-rose-500/10 border border-rose-500/20 text-rose-400 p-3 rounded-2xl text-xs font-medium"></div>
+        <div id="sub-success" class="hidden bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 p-3 rounded-2xl text-xs font-bold text-center"></div>
+
+        <!-- 3 Plans Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <!-- 1 Month Plan -->
+          <div class="glass-card rounded-2xl p-5 border border-slate-800 flex flex-col justify-between hover:border-amber-500/50 transition">
+            <div class="space-y-3">
+              <span class="text-[10px] font-bold text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20 uppercase tracking-wider">Monthly</span>
+              <h4 class="text-lg font-extrabold text-white font-heading">1 Month Access</h4>
+              <div class="text-3xl font-extrabold text-white font-heading">₹1,000 <span class="text-xs text-slate-400 font-normal">/ mo</span></div>
+              <p class="text-[11px] text-slate-400 leading-relaxed">Flexible monthly subscription for single location testing.</p>
+              <ul class="space-y-1.5 text-xs text-slate-300">
+                <li class="flex items-center gap-1.5"><span class="text-amber-400">✓</span> <span>Full AI Review Reply</span></li>
+                <li class="flex items-center gap-1.5"><span class="text-amber-400">✓</span> <span>QR Code Acquisition</span></li>
+                <li class="flex items-center gap-1.5"><span class="text-amber-400">✓</span> <span>Private Feedback Filter</span></li>
+              </ul>
+            </div>
+            <button data-plan="1_month" class="pay-plan-btn w-full mt-5 bg-slate-800 hover:bg-slate-700 text-amber-400 font-bold py-3 rounded-xl text-xs border border-slate-700 transition">Pay ₹1,000</button>
+          </div>
+
+          <!-- 6 Months Plan -->
+          <div class="glass-card rounded-2xl p-5 border border-amber-500/30 flex flex-col justify-between hover:border-amber-400 transition bg-amber-500/5">
+            <div class="space-y-3">
+              <span class="text-[10px] font-bold text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20 uppercase tracking-wider">Semi-Annual</span>
+              <h4 class="text-lg font-extrabold text-white font-heading">6 Months Access</h4>
+              <div class="text-3xl font-extrabold text-white font-heading">₹4,000 <span class="text-xs text-slate-400 font-normal">/ 6 mo</span></div>
+              <p class="text-[11px] text-emerald-400 font-semibold">Save ₹2,000 vs monthly rate!</p>
+              <ul class="space-y-1.5 text-xs text-slate-300">
+                <li class="flex items-center gap-1.5"><span class="text-amber-400">✓</span> <span>All Monthly Features</span></li>
+                <li class="flex items-center gap-1.5"><span class="text-amber-400">✓</span> <span>Multi-Business Franchise</span></li>
+                <li class="flex items-center gap-1.5"><span class="text-amber-400">✓</span> <span>AI Google Posts</span></li>
+              </ul>
+            </div>
+            <button data-plan="6_months" class="pay-plan-btn w-full mt-5 bg-gradient-to-r from-amber-500 to-amber-400 hover:brightness-110 text-slate-950 font-extrabold py-3 rounded-xl text-xs transition shadow-lg shadow-amber-500/20">Pay ₹4,000</button>
+          </div>
+
+          <!-- 12 Months Plan -->
+          <div class="glass-card rounded-2xl p-5 border-2 border-amber-400 flex flex-col justify-between hover:brightness-110 transition bg-gradient-to-b from-amber-500/10 to-transparent relative">
+            <div class="absolute -top-3 right-3 bg-gradient-to-r from-amber-500 to-amber-400 text-slate-950 text-[9px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-md">Best Value</div>
+            <div class="space-y-3">
+              <span class="text-[10px] font-bold text-amber-300 bg-amber-500/20 px-2.5 py-0.5 rounded-full border border-amber-400/30 uppercase tracking-wider">Annual Access</span>
+              <h4 class="text-lg font-extrabold text-white font-heading">12 Months Access</h4>
+              <div class="text-3xl font-extrabold text-amber-400 font-heading">₹5,000 <span class="text-xs text-slate-400 font-normal">/ 12 mo</span></div>
+              <p class="text-[11px] text-emerald-400 font-bold">Save ₹7,000! (Just ₹416/mo)</p>
+              <ul class="space-y-1.5 text-xs text-slate-300">
+                <li class="flex items-center gap-1.5"><span class="text-amber-400">✓</span> <span>All 6-Month Features</span></li>
+                <li class="flex items-center gap-1.5"><span class="text-amber-400">✓</span> <span>Priority AI Generation</span></li>
+                <li class="flex items-center gap-1.5"><span class="text-amber-400">✓</span> <span>Local SEO Scoreboard</span></li>
+              </ul>
+            </div>
+            <button data-plan="12_months" class="pay-plan-btn w-full mt-5 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 text-slate-950 font-extrabold py-3 rounded-xl text-xs transition shadow-lg shadow-amber-500/20">Pay ₹5,000</button>
+          </div>
+        </div>
+
+        <div class="text-center text-[11px] text-slate-500 font-medium pt-2 border-t border-slate-800">
+          🔒 Payments secured by Razorpay (UPI, Cards, NetBanking, PhonePe, Google Pay).
+        </div>
+      </div>
+    </div>
+
+    <script>
+      (function() {
+        const path = window.location.pathname;
+
+        if (path.startsWith('/r/')) {
+          const slug = path.replace('/r/', '').trim();
+          initCustomerPortal(slug);
+        } else {
+          initMerchantDashboard();
+        }
+
+        // --- PUBLIC CUSTOMER PORTAL ---
+        async function initCustomerPortal(slug) {
+          const app = document.getElementById('app');
+          app.innerHTML = '<div class="min-h-screen flex items-center justify-center p-6"><div class="text-center space-y-3"><div class="w-12 h-12 border-4 border-amber-400 border-t-transparent rounded-full animate-spin mx-auto"></div><p class="text-slate-400 text-sm font-medium">Loading Business Profile...</p></div></div>';
+
+          let business = null;
+          try {
+            const res = await fetch('/api/v1/public/business/' + encodeURIComponent(slug));
+            if (res.ok) {
+              business = await res.json();
+            }
+          } catch (e) { console.error(e); }
+
+          if (!business) {
+            app.innerHTML = '<div class="min-h-screen flex items-center justify-center p-4"><div class="glass-card rounded-3xl p-8 max-w-md w-full text-center space-y-4 shadow-2xl"><div class="text-5xl">🏪</div><h2 class="text-2xl font-bold text-white">Business Profile Not Found</h2><p class="text-slate-400 text-sm">The review link scanned is invalid or inactive.</p><a href="/" class="inline-block bg-gradient-to-r from-amber-500 to-amber-400 text-slate-950 font-bold px-6 py-3 rounded-xl shadow-lg">Go to Homepage</a></div></div>';
+            return;
+          }
+
+          let currentRating = 5;
+          let reviewOptions = [];
+          let isGenerating = false;
+
+          async function fetchReviews(rating) {
+            isGenerating = true;
+            renderPortal();
+            try {
+              const res = await fetch('/api/v1/public/generate-reviews', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  businessName: business.name,
+                  category: business.category,
+                  rating: rating
+                })
+              });
+              if (res.ok) {
+                const data = await res.json();
+                reviewOptions = data.options || [];
+              }
+            } catch (e) { console.error(e); }
+            isGenerating = false;
+            renderPortal();
+          }
+
+          function renderPortal() {
+            let html = '<div class="min-h-screen flex flex-col justify-between p-4 sm:p-6 max-w-lg mx-auto">';
+            html += '<div class="w-full my-auto space-y-5">';
+            
+            // Business Header Card
+            html += '<div class="glass-card rounded-3xl p-6 text-center shadow-2xl relative overflow-hidden">';
+            html += '<div class="absolute -top-12 -right-12 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl"></div>';
+            html += '<div class="w-20 h-20 bg-gradient-to-tr from-amber-500 via-amber-400 to-amber-300 text-slate-950 rounded-2xl flex items-center justify-center text-3xl font-extrabold mx-auto shadow-xl shadow-amber-500/20 mb-3 font-heading">' + business.name.charAt(0).toUpperCase() + '</div>';
+            html += '<h1 class="text-2xl font-extrabold text-white tracking-tight font-heading">' + business.name + '</h1>';
+            html += '<div class="mt-1.5 flex items-center justify-center gap-2"><span class="text-[11px] font-extrabold text-amber-400 bg-amber-500/10 px-3 py-0.5 rounded-full border border-amber-500/20 tracking-wider uppercase">' + (business.category || 'Local Business') + '</span>' + (business.city ? '<span class="text-[11px] text-slate-400 font-medium">📍 ' + business.city + '</span>' : '') + '</div>';
+            html += '<p class="text-slate-400 text-xs mt-2.5">How was your visit with us today?</p>';
+            html += '</div>';
+
+            // Star Rating Picker
+            html += '<div class="glass-card rounded-3xl p-6 text-center shadow-2xl space-y-3">';
+            html += '<p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Tap Stars to Rate</p>';
+            html += '<div class="flex justify-center items-center space-x-2 py-1">';
+            [1, 2, 3, 4, 5].forEach(star => {
+              const active = star <= currentRating ? 'text-amber-400 scale-110 star-glow' : 'text-slate-800 hover:text-slate-700';
+              html += '<button data-star="' + star + '" class="star-btn text-4xl sm:text-5xl transition-all duration-200 transform active:scale-125 focus:outline-none ' + active + '">★</button>';
+            });
+            html += '</div>';
+            html += '<p class="text-xs text-slate-300 font-medium">' + (currentRating >= 4 ? '✨ Select a review choice below to copy & open Google Maps' : '💬 Send private feedback directly to management') + '</p>';
+            html += '</div>';
+
+            // 4 or 5 Star AI Review Options Cards
+            if (currentRating >= 4) {
+              html += '<div class="glass-card rounded-3xl p-6 shadow-2xl space-y-4">';
+              html += '<div class="flex items-center justify-between"><div class="flex items-center gap-2"><span class="text-amber-400 text-lg">✨</span><h3 class="text-base font-bold text-white font-heading">5 Instant AI Review Choices</h3></div><button id="ref-btn" class="text-[11px] bg-slate-800/80 hover:bg-slate-800 text-amber-400 font-semibold px-3 py-1.5 rounded-xl border border-slate-700/80 transition">' + (isGenerating ? 'Drafting...' : '🔄 Refresh') + '</button></div>';
+
+              if (isGenerating) {
+                html += '<div class="py-10 text-center space-y-3"><div class="w-7 h-7 border-3 border-amber-400 border-t-transparent rounded-full animate-spin mx-auto"></div><p class="text-xs text-slate-400 font-medium">Crafting 5 custom review suggestions with Groq AI...</p></div>';
+              } else {
+                html += '<div class="space-y-3.5">';
+                const tags = ['✨ Warm & Enthusiastic', '⭐ Quality & Product', '👏 Staff & Service', '⚡ Fast & Easy', '❤️ Local Favorite'];
+                reviewOptions.forEach((opt, idx) => {
+                  const tagText = opt.tag || tags[idx % tags.length];
+                  html += '<div class="glass-card glass-card-hover rounded-2xl p-4.5 space-y-3 text-left">';
+                  html += '<div class="flex items-center justify-between"><span class="text-[11px] font-bold text-amber-300 bg-amber-500/10 px-3 py-0.5 rounded-full border border-amber-500/20">' + tagText + '</span><span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">5-Star Google</span></div>';
+                  html += '<p class="text-sm text-slate-200 leading-relaxed font-normal">"' + opt.text + '"</p>';
+                  html += '<button data-text="' + encodeURIComponent(opt.text) + '" class="copy-post-btn w-full bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:brightness-110 text-slate-950 font-extrabold py-3 px-4 rounded-xl text-xs transition shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2"><span>📋 Copy Review & Open Google Maps</span></button>';
+                  html += '</div>';
+                });
+                html += '</div>';
+              }
+              html += '</div>';
+            } else {
+              // 1 to 3 Star Private Feedback Form
+              html += '<div class="glass-card rounded-3xl p-6 shadow-2xl space-y-4 text-left">';
+              html += '<div class="flex items-center gap-2"><span class="text-rose-400 text-lg">📩</span><h3 class="text-base font-bold text-white font-heading">Send Private Feedback to Owner</h3></div>';
+              html += '<p class="text-xs text-slate-400 leading-relaxed">We apologize that your experience was not 100%. Please send your feedback directly to our management team so we can make things right.</p>';
+              html += '<form id="fb-form" class="space-y-3.5">';
+              html += '<div><label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Your Name</label><input type="text" id="fb-name" placeholder="John Miller" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-amber-400 transition" /></div>';
+              html += '<div><label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Phone or Email</label><input type="text" id="fb-phone" placeholder="So management can reach out to fix this" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-amber-400 transition" /></div>';
+              html += '<div><label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">What went wrong?</label><textarea id="fb-msg" required rows="3" placeholder="Tell us what happened..." class="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-amber-400 resize-none transition"></textarea></div>';
+              html += '<button type="submit" class="w-full bg-slate-800 hover:bg-slate-700/80 border border-slate-700 text-amber-400 font-bold py-3 px-4 rounded-xl text-xs transition flex items-center justify-center gap-2"><span>✉️ Send Private Feedback to Owner</span></button>';
+              html += '</form>';
+              html += '</div>';
+            }
+
+            html += '</div>';
+            html += '<div class="text-center py-4"><p class="text-[11px] text-slate-500 font-medium">Powered by <span class="text-amber-400 font-semibold">RevmeAI</span> • Local Reputation & Growth Engine</p></div>';
+            html += '</div>';
+
+            app.innerHTML = html;
+
+            // Bind listeners
+            document.querySelectorAll('.star-btn').forEach(btn => {
+              btn.onclick = function() {
+                currentRating = Number(this.getAttribute('data-star'));
+                if (currentRating >= 4) fetchReviews(currentRating);
+                else renderPortal();
+              };
+            });
+
+            const refBtn = document.getElementById('ref-btn');
+            if (refBtn) refBtn.onclick = function() { fetchReviews(currentRating); };
+
+            document.querySelectorAll('.copy-post-btn').forEach(btn => {
+              btn.onclick = function() {
+                const text = decodeURIComponent(this.getAttribute('data-text'));
+                navigator.clipboard.writeText(text);
+                this.innerHTML = '<span>✓ Copied! Opening Google...</span>';
+                this.className = 'w-full bg-gradient-to-r from-emerald-500 to-emerald-400 text-white font-bold py-3 px-4 rounded-xl text-xs transition shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2';
+                setTimeout(() => {
+                  const gUrl = business.google_review_link || 'https://search.google.com/local/writereview';
+                  window.open(gUrl, '_blank');
+                }, 800);
+              };
+            });
+
+            const fbForm = document.getElementById('fb-form');
+            if (fbForm) {
+              fbForm.onsubmit = async function(e) {
+                e.preventDefault();
+                const name = document.getElementById('fb-name').value;
+                const phone = document.getElementById('fb-phone').value;
+                const msg = document.getElementById('fb-msg').value;
+
+                try {
+                  const res = await fetch('/api/v1/public/submit-feedback', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      businessId: business.id,
+                      customerName: name,
+                      customerPhone: phone,
+                      rating: currentRating,
+                      message: msg
+                    })
+                  });
+                  if (res.ok) {
+                    alert('Thank you! Your private feedback has been sent directly to the owner.');
+                    document.getElementById('fb-msg').value = '';
+                  }
+                } catch (err) { console.error(err); }
+              };
+            }
+          }
+
+          fetchReviews(5);
+        }
+
+        // --- MERCHANT DASHBOARD ---
+        async function initMerchantDashboard() {
+          const app = document.getElementById('app');
+          const token = localStorage.getItem('replydesk_token');
+
+          if (!token) {
+            renderLogin();
+            return;
+          }
+
+          let businesses = [];
+          let activeBiz = null;
+          let activeTab = 'tab-qr';
+          let privateFeedbacks = [];
+          let servicesList = [
+            { id: 1, name: 'Premium Service / Consultation', price: '$49', duration: '30 mins', desc: 'Top-rated service with dedicated professional care.' },
+            { id: 2, name: 'Express Package', price: '$89', duration: '60 mins', desc: 'Fast, comprehensive service tailored to your needs.' }
+          ];
+
+          try {
+            const res = await fetch('/api/v1/businesses', {
+              headers: { 'Authorization': 'Bearer ' + token }
+            });
+            if (res.ok) {
+              businesses = await res.json();
+              if (businesses && businesses.length > 0) activeBiz = businesses[0];
+            } else {
+              localStorage.removeItem('replydesk_token');
+              renderLogin();
+              return;
+            }
+          } catch (e) { console.error(e); }
+
+          renderDashboard();
+
+          async function loadPrivateFeedback() {
+            if (!activeBiz) return;
+            try {
+              const res = await fetch('/api/v1/business/' + activeBiz.id + '/feedback', {
+                headers: { 'Authorization': 'Bearer ' + token }
+              });
+              if (res.ok) {
+                const data = await res.json();
+                privateFeedbacks = data.feedback || [];
+              }
+            } catch (e) { console.error(e); }
+          }
+
+          function renderDashboard() {
+            const slug = activeBiz ? (activeBiz.slug || activeBiz.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')) : 'default-biz';
+            const fullReviewUrl = window.location.origin + '/r/' + slug;
+            const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' + encodeURIComponent(fullReviewUrl);
+            const waMsg = 'Hi! Thank you for visiting ' + (activeBiz ? activeBiz.name : 'us') + '. Tap here to leave a quick 5-second Google review: ' + fullReviewUrl;
+
+            let html = '<div class="min-h-screen flex flex-col">';
+            
+            // Navbar
+            html += '<header class="bg-slate-900/80 backdrop-blur-xl border-b border-slate-800/80 px-6 py-4 flex items-center justify-between sticky top-0 z-50">';
+            html += '<div class="flex items-center gap-3"><div class="w-10 h-10 bg-gradient-to-tr from-amber-500 to-amber-400 text-slate-950 rounded-xl flex items-center justify-center font-extrabold text-xl shadow-lg shadow-amber-500/20 font-heading">R</div><div><h1 class="font-extrabold text-white text-lg leading-none font-heading">RevmeAI</h1><p class="text-[11px] text-amber-400 font-semibold mt-0.5">Local Business Reputation OS</p></div></div>';
+            html += '<div class="flex items-center gap-3"><select id="biz-select" class="bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-amber-400">';
+            businesses.forEach(b => {
+              html += '<option value="' + b.id + '" ' + (b.id === activeBiz?.id ? 'selected' : '') + '>' + b.name + '</option>';
+            });
+            html += '</select><button id="open-add-modal-btn" class="bg-gradient-to-r from-amber-500 to-amber-400 hover:brightness-110 text-slate-950 font-bold px-3.5 py-2 rounded-xl text-xs transition shadow-md shadow-amber-500/20">+ Add Profile</button><button id="open-sub-modal-btn" class="bg-slate-800 hover:bg-slate-700 text-amber-400 font-bold px-3.5 py-2 rounded-xl text-xs border border-amber-500/30 transition">💎 Upgrade / Plans</button><button id="logout-btn" class="text-xs text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 px-3.5 py-2 rounded-xl border border-rose-500/20 transition">Sign Out</button></div>';
+            html += '</header>';
+
+            // Main Layout
+            html += '<div class="flex flex-1 overflow-hidden">';
+            
+            // Sidebar matching PRD Section 129
+            html += '<aside class="w-64 bg-slate-900/40 backdrop-blur-xl border-r border-slate-800/80 p-4 space-y-2 select-none shrink-0">';
+            html += '<button data-tab="tab-qr" class="nav-tab w-full text-left px-4 py-3 rounded-xl font-bold text-xs flex items-center gap-2.5 transition ' + (activeTab === 'tab-qr' ? 'bg-gradient-to-r from-amber-500 to-amber-400 text-slate-950 shadow-lg shadow-amber-500/20' : 'text-slate-400 hover:bg-slate-800/60 hover:text-white') + '">📱 Get Reviews & QR</button>';
+            html += '<button data-tab="tab-posts" class="nav-tab w-full text-left px-4 py-3 rounded-xl font-bold text-xs flex items-center gap-2.5 transition ' + (activeTab === 'tab-posts' ? 'bg-gradient-to-r from-amber-500 to-amber-400 text-slate-950 shadow-lg shadow-amber-500/20' : 'text-slate-400 hover:bg-slate-800/60 hover:text-white') + '">📢 AI Google Posts</button>';
+            html += '<button data-tab="tab-inbox" class="nav-tab w-full text-left px-4 py-3 rounded-xl font-bold text-xs flex items-center gap-2.5 transition ' + (activeTab === 'tab-inbox' ? 'bg-gradient-to-r from-amber-500 to-amber-400 text-slate-950 shadow-lg shadow-amber-500/20' : 'text-slate-400 hover:bg-slate-800/60 hover:text-white') + '">📩 Private Feedback</button>';
+            html += '<button data-tab="tab-reply" class="nav-tab w-full text-left px-4 py-3 rounded-xl font-bold text-xs flex items-center gap-2.5 transition ' + (activeTab === 'tab-reply' ? 'bg-gradient-to-r from-amber-500 to-amber-400 text-slate-950 shadow-lg shadow-amber-500/20' : 'text-slate-400 hover:bg-slate-800/60 hover:text-white') + '">⚡ AI Review Replies</button>';
+            html += '<button data-tab="tab-seo" class="nav-tab w-full text-left px-4 py-3 rounded-xl font-bold text-xs flex items-center gap-2.5 transition ' + (activeTab === 'tab-seo' ? 'bg-gradient-to-r from-amber-500 to-amber-400 text-slate-950 shadow-lg shadow-amber-500/20' : 'text-slate-400 hover:bg-slate-800/60 hover:text-white') + '">🎯 Local SEO Scoreboard</button>';
+            html += '<button data-tab="tab-web" class="nav-tab w-full text-left px-4 py-3 rounded-xl font-bold text-xs flex items-center gap-2.5 transition ' + (activeTab === 'tab-web' ? 'bg-gradient-to-r from-amber-500 to-amber-400 text-slate-950 shadow-lg shadow-amber-500/20' : 'text-slate-400 hover:bg-slate-800/60 hover:text-white') + '">🌐 AI Website Builder</button>';
+            html += '<button data-tab="tab-services" class="nav-tab w-full text-left px-4 py-3 rounded-xl font-bold text-xs flex items-center gap-2.5 transition ' + (activeTab === 'tab-services' ? 'bg-gradient-to-r from-amber-500 to-amber-400 text-slate-950 shadow-lg shadow-amber-500/20' : 'text-slate-400 hover:bg-slate-800/60 hover:text-white') + '">🛍️ Services Catalog</button>';
+            html += '<button data-tab="tab-assistant" class="nav-tab w-full text-left px-4 py-3 rounded-xl font-bold text-xs flex items-center gap-2.5 transition ' + (activeTab === 'tab-assistant' ? 'bg-gradient-to-r from-amber-500 to-amber-400 text-slate-950 shadow-lg shadow-amber-500/20' : 'text-slate-400 hover:bg-slate-800/60 hover:text-white') + '">🧠 AI Chief-of-Staff</button>';
+            html += '<div class="pt-4 border-t border-slate-800/80"><button id="open-sub-modal-side-btn" class="w-full bg-gradient-to-r from-amber-500/20 to-amber-400/20 hover:from-amber-500/30 hover:to-amber-400/30 text-amber-300 font-bold p-3 rounded-xl text-xs border border-amber-500/30 flex items-center justify-center gap-2">💎 Subscription Plans</button></div>';
+            html += '</aside>';
+
+            // Content Area
+            html += '<main class="flex-1 overflow-y-auto p-8 space-y-6 max-w-6xl mx-auto w-full">';
+
+            if (activeTab === 'tab-qr') {
+              html += '<div class="glass-card rounded-3xl p-8 flex justify-between items-center relative overflow-hidden shadow-2xl">';
+              html += '<div><span class="text-xs font-extrabold text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full uppercase border border-amber-500/20 tracking-wider">Review Acquisition Studio</span><h2 class="text-3xl font-extrabold text-white mt-2 font-heading">Get 5-Star Google Reviews Effortlessly</h2><p class="text-slate-400 text-sm mt-1">Share your custom link or print your counter QR code for 5-second customer reviews.</p></div>';
+              html += '<a href="/r/' + slug + '" target="_blank" class="bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:brightness-110 text-slate-950 font-extrabold px-5 py-3 rounded-2xl text-xs shadow-lg shadow-amber-500/20 shrink-0">👁️ Preview Customer Portal</a>';
+              html += '</div>';
+
+              html += '<div class="grid grid-cols-1 md:grid-cols-2 gap-6">';
+              html += '<div class="glass-card rounded-3xl p-6 text-center space-y-4 shadow-xl"><h3 class="text-base font-bold text-white font-heading">📱 Counter Display QR Code</h3><div class="bg-white p-4 inline-block rounded-2xl shadow-2xl border-4 border-slate-800"><img src="' + qrUrl + '" alt="QR" class="w-48 h-48 mx-auto" /></div><p class="text-xs text-amber-400 font-bold">' + (activeBiz?.name || 'Business') + '</p><div class="flex justify-center gap-3"><a href="' + qrUrl + '" download="' + slug + '-qr.png" target="_blank" class="inline-block bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl border border-slate-700 transition">📥 Download PNG</a><button onclick="window.print()" class="inline-block bg-amber-500/10 text-amber-400 text-xs font-bold px-4 py-2.5 rounded-xl border border-amber-500/20 transition">🖨️ Print Poster</button></div></div>';
+
+              html += '<div class="space-y-6">';
+              html += '<div class="glass-card rounded-3xl p-6 space-y-3 shadow-xl"><h3 class="text-base font-bold text-white font-heading">🔗 Shareable Customer Review Link</h3><p class="text-xs text-slate-400">Send this direct link to your customers via SMS, Email, or Social Media:</p><div class="flex items-center gap-2 bg-slate-950 border border-slate-800 rounded-xl p-2.5 overflow-hidden"><input type="text" readonly value="' + fullReviewUrl + '" class="bg-transparent text-xs font-mono text-amber-400 min-w-0 flex-1 px-2 select-all focus:outline-none truncate" /><button id="c-link" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-4 py-2 rounded-lg text-xs transition shrink-0">Copy</button><a href="' + fullReviewUrl + '" target="_blank" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold px-3 py-2 rounded-lg text-xs transition shrink-0" title="Open Link">↗</a></div></div>';
+
+              html += '<div class="glass-card rounded-3xl p-6 space-y-3 shadow-xl"><h3 class="text-base font-bold text-white font-heading">💬 WhatsApp Review Launcher</h3><p class="text-xs text-slate-300 bg-slate-950 p-3.5 rounded-xl font-mono leading-relaxed border border-slate-800/80">' + waMsg + '</p><a href="https://api.whatsapp.com/send?text=' + encodeURIComponent(waMsg) + '" target="_blank" class="block bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 text-center rounded-xl text-xs transition shadow-lg shadow-emerald-600/20">🚀 Launch WhatsApp Request</a></div>';
+              html += '</div></div>';
+            } else if (activeTab === 'tab-posts') {
+              html += '<div class="glass-card rounded-3xl p-8 space-y-6 shadow-xl"><span class="text-xs font-extrabold text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20 tracking-wider">Google Business Profile Growth</span><h2 class="text-2xl font-bold text-white font-heading">AI Google Posts Generator</h2><p class="text-slate-400 text-xs">Generate regular Google Business updates to boost local SEO ranking and attract nearby customers.</p>';
+              
+              html += '<div class="grid grid-cols-1 md:grid-cols-2 gap-4">';
+              const topics = ['🎉 Weekend Special Offer', '⭐ Top Rated Highlight', '🚀 New Product Arrival', '❤️ Community Appreciation'];
+              topics.forEach(t => {
+                html += '<div class="glass-card glass-card-hover rounded-2xl p-5 space-y-3 text-left">';
+                html += '<span class="text-[11px] font-bold text-amber-300 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20">' + t + '</span>';
+                html += '<p class="text-xs text-slate-300 leading-relaxed font-normal">"Looking for top-tier quality in town? Visit ' + (activeBiz?.name || 'us') + ' for our exclusive ' + t.replace(/[^a-zA-Z ]/g, '').trim() + '! Tap to book or visit us today."</p>';
+                html += '<button onclick="navigator.clipboard.writeText(this.previousElementSibling.innerText); this.innerText=\'✓ Copied!\'; setTimeout(() => this.innerText=\'📋 Copy Post Text\', 2000)" class="w-full bg-slate-800 hover:bg-slate-700 text-amber-400 font-bold py-2.5 rounded-xl text-xs transition">📋 Copy Post Text</button>';
+                html += '</div>';
+              });
+              html += '</div></div>';
+            } else if (activeTab === 'tab-inbox') {
+              html += '<div class="glass-card rounded-3xl p-8 space-y-4 shadow-xl"><span class="text-xs font-extrabold text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20 tracking-wider">Protected Public Rating</span><h2 class="text-2xl font-bold text-white font-heading">Private Customer Feedback Inbox</h2><p class="text-slate-400 text-xs">Direct 1-3 star messages submitted by customers privately before public Google posting.</p>';
+              
+              if (privateFeedbacks.length === 0) {
+                html += '<div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-10 text-center space-y-2"><div class="text-4xl">🎉</div><h4 class="text-sm font-bold text-white">No Complaints Received</h4><p class="text-xs text-slate-400">Your public 5-star Google rating is 100% protected!</p></div>';
+              } else {
+                html += '<div class="space-y-4">';
+                privateFeedbacks.forEach(fb => {
+                  html += '<div class="glass-card rounded-2xl p-5 border border-slate-800 space-y-2 text-left">';
+                  html += '<div class="flex items-center justify-between"><div class="flex items-center gap-2"><span class="text-amber-400 font-bold">★ ' + fb.rating + '/5</span><span class="text-white font-bold text-sm">' + (fb.customer_name || 'Anonymous Customer') + '</span></div><span class="text-[10px] text-slate-400">' + (fb.created_at ? new Date(fb.created_at).toLocaleDateString() : 'Recently') + '</span></div>';
+                  html += '<p class="text-xs text-slate-300 italic">"' + fb.message + '"</p>';
+                  if (fb.customer_phone) html += '<p class="text-[11px] font-mono text-amber-400">Contact: ' + fb.customer_phone + '</p>';
+                  html += '</div>';
+                });
+                html += '</div>';
+              }
+              html += '</div>';
+            } else if (activeTab === 'tab-reply') {
+              html += '<div class="glass-card rounded-3xl p-8 space-y-4 shadow-xl"><h2 class="text-2xl font-bold text-white font-heading">AI Google Review Reply Assistant</h2><p class="text-slate-400 text-xs">Paste a Google Review to draft an AI reply instantly.</p><textarea id="rev-in" rows="4" placeholder="Paste customer review here..." class="w-full bg-slate-950 border border-slate-800 rounded-2xl p-4 text-xs text-white focus:outline-none focus:border-amber-400 resize-none"></textarea><button id="gen-r-btn" class="bg-gradient-to-r from-amber-500 to-amber-400 text-slate-950 font-bold px-6 py-3 rounded-xl text-xs transition shadow-lg shadow-amber-500/20">✨ Generate AI Reply</button><div id="r-out" class="hidden bg-slate-950 p-4 rounded-2xl border border-slate-800 text-xs text-amber-400 font-mono leading-relaxed"></div></div>';
+            } else if (activeTab === 'tab-seo') {
+              // Local SEO Scoreboard (PRD Section 36-38)
+              html += '<div class="glass-card rounded-3xl p-8 space-y-6 shadow-xl">';
+              html += '<div class="flex items-center justify-between"><div><span class="text-xs font-extrabold text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20 tracking-wider uppercase">Local SEO Scoreboard</span><h2 class="text-2xl font-bold text-white mt-1 font-heading">Google Business Profile Audit</h2></div><div class="text-right"><div class="text-4xl font-extrabold text-amber-400 font-heading">88 <span class="text-lg text-slate-500">/ 100</span></div><p class="text-[11px] text-emerald-400 font-semibold">High Local Search Rank</p></div></div>';
+              
+              html += '<div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">';
+              html += '<div class="bg-slate-950/80 p-4 rounded-2xl border border-slate-800"><div class="text-xs text-slate-400">Profile Completeness</div><div class="text-xl font-bold text-white mt-1">95%</div></div>';
+              html += '<div class="bg-slate-950/80 p-4 rounded-2xl border border-slate-800"><div class="text-xs text-slate-400">Review Response Rate</div><div class="text-xl font-bold text-amber-400 mt-1">94%</div></div>';
+              html += '<div class="bg-slate-950/80 p-4 rounded-2xl border border-slate-800"><div class="text-xs text-slate-400">Review Velocity</div><div class="text-xl font-bold text-emerald-400 mt-1">+18%</div></div>';
+              html += '</div>';
+
+              html += '<div class="space-y-3"><h3 class="text-sm font-bold text-white font-heading">AI Actionable Recommendations</h3>';
+              html += '<div class="glass-card rounded-2xl p-4 flex items-center justify-between border border-slate-800"><div><span class="text-[10px] font-bold bg-amber-500/10 text-amber-400 px-2 py-0.5 rounded-full border border-amber-500/20">Critical Fix</span><p class="text-xs font-bold text-white mt-1">Add 5 Missing Service Descriptions</p><p class="text-[11px] text-slate-400">Boost keyword relevance for search queries in ' + (activeBiz?.city || 'your area') + '.</p></div><button onclick="alert(\'AI is drafting 5 service descriptions...\')" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-3.5 py-2 rounded-xl text-xs shrink-0">✨ Fix with AI</button></div>';
+              html += '<div class="glass-card rounded-2xl p-4 flex items-center justify-between border border-slate-800"><div><span class="text-[10px] font-bold bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20">SEO Booster</span><p class="text-xs font-bold text-white mt-1">Publish Weekly AI Google Post</p><p class="text-[11px] text-slate-400">Keeps your Google Maps listing active in the local 3-pack.</p></div><button onclick="alert(\'Drafting weekly post...\')" class="bg-slate-800 hover:bg-slate-700 text-white font-bold px-3.5 py-2 rounded-xl text-xs border border-slate-700 shrink-0">✨ Draft Post</button></div>';
+              html += '</div></div>';
+            } else if (activeTab === 'tab-web') {
+              // AI Website Builder (PRD Section 29-35)
+              html += '<div class="glass-card rounded-3xl p-8 space-y-6 shadow-xl"><span class="text-xs font-extrabold text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20 tracking-wider">No-Code + AI Website Builder</span><h2 class="text-2xl font-bold text-white font-heading">AI Business Website Generator</h2><p class="text-slate-400 text-xs">Generate a high-converting, mobile-ready business landing page with automated SEO metadata.</p>';
+              
+              html += '<div class="bg-slate-950/80 p-6 rounded-2xl border border-slate-800 space-y-4 text-left">';
+              html += '<div class="flex items-center justify-between"><h3 class="text-sm font-bold text-white">🌐 Published Business Website</h3><span class="text-[10px] font-bold bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full border border-emerald-500/20">LIVE & SSL SECURED</span></div>';
+              html += '<p class="text-xs text-slate-300 font-mono bg-slate-900 p-3 rounded-xl border border-slate-800">' + window.location.origin + '/r/' + slug + '</p>';
+              html += '<div class="grid grid-cols-2 gap-3"><button onclick="window.open(\'/r/' + slug + '\', \'_blank\')" class="bg-gradient-to-r from-amber-500 to-amber-400 text-slate-950 font-bold py-3 rounded-xl text-xs shadow-lg shadow-amber-500/20">👁️ View Public Website</button><button onclick="alert(\'Re-generating website with latest AI brand voice...\')" class="bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 rounded-xl text-xs border border-slate-700">⚡ Re-Generate with AI</button></div>';
+              html += '</div></div>';
+            } else if (activeTab === 'tab-services') {
+              // Services & Products Catalog (PRD Section 44-45)
+              html += '<div class="glass-card rounded-3xl p-8 space-y-6 shadow-xl"><div class="flex items-center justify-between"><div><span class="text-xs font-extrabold text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20 tracking-wider uppercase">Business Catalog</span><h2 class="text-2xl font-bold text-white mt-1 font-heading">Services & Offerings</h2></div><button onclick="const name=prompt(\'Service Name:\'); if(name){alert(\'Service added!\');}" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs">+ Add Service</button></div>';
+              
+              html += '<div class="grid grid-cols-1 md:grid-cols-2 gap-4">';
+              servicesList.forEach(s => {
+                html += '<div class="glass-card rounded-2xl p-5 border border-slate-800 space-y-2 text-left">';
+                html += '<div class="flex items-center justify-between"><h4 class="text-sm font-bold text-white font-heading">' + s.name + '</h4><span class="text-xs font-extrabold text-amber-400">' + s.price + '</span></div>';
+                html += '<p class="text-xs text-slate-400 leading-relaxed">' + s.desc + '</p>';
+                html += '<span class="text-[10px] text-slate-500 font-mono">Duration: ' + s.duration + '</span>';
+                html += '</div>';
+              });
+              html += '</div></div>';
+            } else if (activeTab === 'tab-assistant') {
+              // AI Chief-of-Staff Assistant (PRD Section 42-43, 127-128)
+              html += '<div class="glass-card rounded-3xl p-8 space-y-4 shadow-xl"><span class="text-xs font-extrabold text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20 tracking-wider">AI Executive Advisor</span><h2 class="text-2xl font-bold text-white font-heading">RevmeAI Chief-of-Staff Assistant</h2><p class="text-slate-400 text-xs">Ask questions about your business reputation, review velocity, or get instant growth recommendations.</p>';
+              
+              html += '<div id="assistant-chat" class="bg-slate-950 p-5 rounded-2xl border border-slate-800 min-h-[160px] text-xs text-slate-300 leading-relaxed font-normal space-y-3"><div class="bg-slate-900/90 border border-slate-800 p-4 rounded-xl"><span class="text-[10px] font-bold text-amber-400 uppercase tracking-wider block mb-1">🤖 RevmeAI Chief-of-Staff</span>"Good day! Your business reputation for ' + (activeBiz?.name || 'your business') + ' is performing strongly at 4.8★ with 94% response rate. I recommend launching a weekend review request campaign to gain 15 new Google reviews!"</div></div>';
+              
+              html += '<div class="flex gap-2"><input type="text" id="assistant-input" placeholder="Ask RevmeAI anything..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-amber-400" /><button id="assistant-send-btn" class="bg-gradient-to-r from-amber-500 to-amber-400 text-slate-950 font-bold px-5 py-3 rounded-xl text-xs transition shadow-lg shadow-amber-500/20 shrink-0">Send</button></div>';
+              html += '</div>';
+            }
+
+            html += '</main></div></div>';
+
+            app.innerHTML = html;
+
+            // Check Subscription Status (Paywall Enforcement)
+            fetch('/api/v1/payments/status', {
+              headers: { 'Authorization': 'Bearer ' + token }
+            }).then(r => r.json()).then(sub => {
+              const subModal = document.getElementById('sub-modal');
+              if (sub && sub.is_active) {
+                const badge = document.getElementById('sub-active-badge');
+                const text = document.getElementById('sub-active-text');
+                if (badge && text) {
+                  const pName = sub.subscription_plan === '12_months' ? '12 Months Annual' : sub.subscription_plan === '6_months' ? '6 Months' : '1 Month';
+                  text.innerText = 'Active ' + pName + ' Plan (Expires ' + new Date(sub.subscription_expires_at).toLocaleDateString() + ')';
+                  badge.classList.remove('hidden');
+                }
+              } else {
+                // Pre-payment Requirement: User has no active subscription -> Show Paywall Modal automatically
+                if (subModal) {
+                  const errDiv = document.getElementById('sub-error');
+                  if (errDiv) {
+                    errDiv.innerText = '🔒 Action Required: Payment required to access RevmeAI. Please select a subscription plan below to activate your account.';
+                    errDiv.classList.remove('hidden');
+                  }
+                  subModal.classList.remove('hidden');
+                }
+              }
+            }).catch(e => console.error(e));
+
+            // Subscription Modal Trigger Wire-Up
+            const subModal = document.getElementById('sub-modal');
+            const openSubBtn = document.getElementById('open-sub-modal-btn');
+            const openSubSideBtn = document.getElementById('open-sub-modal-side-btn');
+            const closeSubBtn = document.getElementById('close-sub-modal-btn');
+
+            if (subModal) {
+              if (openSubBtn) openSubBtn.onclick = () => subModal.classList.remove('hidden');
+              if (openSubSideBtn) openSubSideBtn.onclick = () => subModal.classList.remove('hidden');
+              if (closeSubBtn) closeSubBtn.onclick = () => subModal.classList.add('hidden');
+            }
+
+            // Payment Plan Action Buttons
+            document.querySelectorAll('.pay-plan-btn').forEach(btn => {
+              btn.onclick = async function() {
+                const planKey = this.getAttribute('data-plan');
+                const errDiv = document.getElementById('sub-error');
+                const succDiv = document.getElementById('sub-success');
+                if (errDiv) errDiv.classList.add('hidden');
+                if (succDiv) succDiv.classList.add('hidden');
+
+                this.innerText = 'Processing Order...';
+                try {
+                  const res = await fetch('/api/v1/payments/create-order', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                    body: JSON.stringify({ plan: planKey })
+                  });
+                  const orderData = await res.json();
+                  if (!res.ok) throw new Error(orderData.message || 'Payment failed');
+
+                  // Handle Razorpay or Demo mode verification
+                  if (window.Razorpay && orderData.key_id !== 'rzp_test_dummy_key_id') {
+                    const rzp = new window.Razorpay({
+                      key: orderData.key_id,
+                      amount: orderData.amount,
+                      currency: orderData.currency,
+                      name: 'RevmeAI',
+                      description: orderData.plan_name,
+                      order_id: orderData.order_id,
+                      handler: async function (response) {
+                        await verifySubPayment(response.razorpay_order_id, response.razorpay_payment_id, response.razorpay_signature, planKey);
+                      }
+                    });
+                    rzp.open();
+                  } else {
+                    // Staging fallback activation
+                    await verifySubPayment(orderData.order_id, 'pay_demo_' + Date.now(), 'demo_sig', planKey);
+                  }
+                } catch (e) {
+                  if (errDiv) {
+                    errDiv.innerText = e.message;
+                    errDiv.classList.remove('hidden');
+                  }
+                }
+                const label = planKey === '12_months' ? 'Pay ₹5,000' : planKey === '6_months' ? 'Pay ₹4,000' : 'Pay ₹1,000';
+                this.innerText = label;
+              };
+            });
+
+            async function verifySubPayment(orderId, payId, sig, planKey) {
+              const errDiv = document.getElementById('sub-error');
+              const succDiv = document.getElementById('sub-success');
+              try {
+                const res = await fetch('/api/v1/payments/verify-payment', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                  body: JSON.stringify({
+                    razorpay_order_id: orderId,
+                    razorpay_payment_id: payId,
+                    razorpay_signature: sig,
+                    plan: planKey
+                  })
+                });
+                const data = await res.json();
+                if (res.ok && data.status === 'success') {
+                  if (succDiv) {
+                    succDiv.innerText = '🎉 Payment Verified! ' + data.message;
+                    succDiv.classList.remove('hidden');
+                  }
+                  setTimeout(() => {
+                    renderDashboard();
+                  }, 1500);
+                } else {
+                  throw new Error(data.message || 'Verification failed');
+                }
+              } catch (e) {
+                if (errDiv) {
+                  errDiv.innerText = e.message;
+                  errDiv.classList.remove('hidden');
+                }
+              }
+            }
+
+            // Bind Events
+            document.querySelectorAll('.nav-tab').forEach(b => {
+              b.onclick = function() {
+                activeTab = this.getAttribute('data-tab');
+                if (activeTab === 'tab-inbox') {
+                  loadPrivateFeedback().then(() => renderDashboard());
+                } else {
+                  renderDashboard();
+                }
+              };
+            });
+
+            const bizSelect = document.getElementById('biz-select');
+            if (bizSelect) {
+              bizSelect.onchange = function() {
+                const bId = Number(this.value);
+                activeBiz = businesses.find(b => b.id === bId) || activeBiz;
+                renderDashboard();
+              };
+            }
+
+            const cLink = document.getElementById('c-link');
+            if (cLink) cLink.onclick = function() {
+              navigator.clipboard.writeText(fullReviewUrl);
+              cLink.innerText = '✓ Copied!';
+              setTimeout(() => cLink.innerText = 'Copy', 2000);
+            };
+
+            const genRBtn = document.getElementById('gen-r-btn');
+            if (genRBtn) genRBtn.onclick = async function() {
+              const text = document.getElementById('rev-in').value;
+              if (!text) return;
+              genRBtn.innerText = 'Generating AI Reply...';
+              try {
+                const res = await fetch('/api/v1/replies/generate', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                  body: JSON.stringify({ businessId: activeBiz.id, customerName: 'Customer', reviewText: text, rating: 5, tone: 'Friendly' })
+                });
+                if (res.ok) {
+                  const data = await res.json();
+                  const out = document.getElementById('r-out');
+                  out.innerText = data.replyText || 'Thank you so much for your review!';
+                  out.classList.remove('hidden');
+                } else if (res.status === 402) {
+                  // Paywall triggered
+                  const subModal = document.getElementById('sub-modal');
+                  if (subModal) subModal.classList.remove('hidden');
+                }
+              } catch (e) { console.error(e); }
+              genRBtn.innerText = '✨ Generate AI Reply';
+            };
+
+            const assistantSendBtn = document.getElementById('assistant-send-btn');
+            if (assistantSendBtn) assistantSendBtn.onclick = async function() {
+              const input = document.getElementById('assistant-input');
+              const text = input ? input.value : '';
+              if (!text) return;
+              assistantSendBtn.innerText = 'Thinking...';
+              try {
+                const res = await fetch('/api/v1/business/' + activeBiz.id + '/ai-assistant', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                  body: JSON.stringify({ message: text })
+                });
+                if (res.ok) {
+                  const data = await res.json();
+                  const chat = document.getElementById('assistant-chat');
+                  if (chat) {
+                    chat.innerHTML += '<div class="bg-amber-500/10 border border-amber-500/20 p-3 rounded-xl text-amber-300 font-medium font-mono text-[11px] mt-2">You: ' + text + '</div><div class="bg-slate-900 border border-slate-800 p-4 rounded-xl mt-2 text-white"><span class="text-[10px] font-bold text-amber-400 uppercase tracking-wider block mb-1">🤖 RevmeAI Chief-of-Staff</span>' + data.reply + '</div>';
+                  }
+                  if (input) input.value = '';
+                }
+              } catch (e) { console.error(e); }
+              assistantSendBtn.innerText = 'Send';
+            };
+
+            const logoutBtn = document.getElementById('logout-btn');
+            if (logoutBtn) logoutBtn.onclick = function() {
+              localStorage.removeItem('replydesk_token');
+              renderLogin();
+            };
+
+            const openAddModalBtn = document.getElementById('open-add-modal-btn');
+            const addModal = document.getElementById('add-modal');
+            const closeModalBtn = document.getElementById('close-modal-btn');
+
+            if (openAddModalBtn && addModal) {
+              openAddModalBtn.onclick = () => addModal.classList.remove('hidden');
+            }
+            if (closeModalBtn && addModal) {
+              closeModalBtn.onclick = () => addModal.classList.add('hidden');
+            }
+
+            const newBizForm = document.getElementById('new-biz-form');
+            if (newBizForm) {
+              newBizForm.onsubmit = async function(e) {
+                e.preventDefault();
+                const name = document.getElementById('new-biz-name').value;
+                const cat = document.getElementById('new-biz-cat').value || 'Local Business';
+                const city = document.getElementById('new-biz-city').value || '';
+                const link = document.getElementById('new-biz-link').value || 'https://search.google.com/local/writereview';
+
+                try {
+                  const res = await fetch('/api/v1/businesses', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                    body: JSON.stringify({ name, category: cat, city: city, google_review_link: link })
+                  });
+                  if (res.ok) {
+                    addModal.classList.add('hidden');
+                    initMerchantDashboard();
+                  } else if (res.status === 402) {
+                    addModal.classList.add('hidden');
+                    const subModal = document.getElementById('sub-modal');
+                    if (subModal) subModal.classList.remove('hidden');
+                  }
+                } catch (err) { console.error(err); }
+              };
+            }
+          }
+
+          function renderLogin() {
+            let html = '<div class="min-h-screen py-10 px-4 max-w-5xl mx-auto flex flex-col justify-between space-y-12">';
+            
+            // Header branding
+            html += '<header class="flex items-center justify-between"><div class="flex items-center gap-3"><div class="w-10 h-10 bg-gradient-to-tr from-amber-500 to-amber-400 text-slate-950 rounded-xl flex items-center justify-center font-extrabold text-xl shadow-lg shadow-amber-500/20 font-heading">R</div><div><h1 class="font-extrabold text-white text-lg leading-none font-heading">RevmeAI</h1><p class="text-[11px] text-amber-400 font-semibold mt-0.5">rev.scalezix.com</p></div></div><span class="text-xs text-slate-400 bg-slate-900 px-3 py-1.5 rounded-full border border-slate-800">🔒 256-Bit SSL Secured</span></header>';
+
+            // Main 2-Column Grid (Left: Interactive Demo Sandbox, Right: Account Sign In / Sign Up)
+            html += '<div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">';
+            
+            // Left Column: Interactive Live Demo Sandbox
+            html += '<div class="glass-card rounded-3xl p-6 md:p-8 space-y-5 border border-amber-500/30 shadow-2xl relative bg-amber-500/5">';
+            html += '<div><span class="text-[10px] font-extrabold text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full uppercase border border-amber-500/20 tracking-wider">⚡ Instant Live Demo</span><h2 class="text-2xl font-extrabold text-white font-heading mt-2">Test AI Review Reply</h2><p class="text-xs text-slate-400 leading-relaxed">Try our AI review reply generator in real-time before signing up!</p></div>';
+            
+            html += '<form id="demo-form" class="space-y-3.5">';
+            html += '<div><label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Business Name</label><input type="text" id="demo-biz" value="Artisan Bakery & Cafe" class="w-full bg-slate-950/90 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-amber-400 transition" /></div>';
+            html += '<div class="grid grid-cols-2 gap-3">';
+            html += '<div><label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Rating</label><select id="demo-rating" class="w-full bg-slate-950/90 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-400"><option value="5">5 ★★★★★ (Positive)</option><option value="3">3 ★★★ (Mixed)</option><option value="1">1 ★ (Critical)</option></select></div>';
+            html += '<div><label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Tone</label><select id="demo-tone" class="w-full bg-slate-950/90 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-400"><option value="friendly">Friendly & Warm</option><option value="professional">Professional</option><option value="empathetic">Empathetic</option></select></div>';
+            html += '</div>';
+            html += '<div><label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Customer Review</label><textarea id="demo-review" rows="2" class="w-full bg-slate-950/90 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-amber-400 resize-none">Amazing croissants and friendly staff! Will definitely come back.</textarea></div>';
+            html += '<button type="submit" id="demo-submit-btn" class="w-full bg-gradient-to-r from-amber-500 to-amber-400 text-slate-950 font-extrabold py-3 rounded-xl text-xs transition shadow-lg shadow-amber-500/20">✨ Generate Free Demo AI Reply</button>';
+            html += '</form>';
+
+            html += '<div id="demo-result" class="hidden bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-3 text-left">';
+            html += '<div class="flex items-center justify-between"><span class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">Generated AI Response</span><span class="text-[9px] bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded">Demo Preview</span></div>';
+            html += '<p id="demo-text" class="text-xs text-slate-200 leading-relaxed font-normal italic"></p>';
+            html += '<div class="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-[11px] text-amber-300 font-medium">💡 Sign up and choose a plan to connect your Google Business Profile & automate replies.</div>';
+            html += '</div>';
+            html += '</div>';
+
+            // Right Column: Sign In / Register Form
+            html += '<div class="glass-card rounded-3xl p-6 md:p-8 shadow-2xl space-y-6">';
+            html += '<div class="text-center space-y-2"><h2 class="text-2xl font-bold text-white font-heading">Sign In / Register</h2><p class="text-xs text-slate-400">Access your RevmeAI Merchant Dashboard</p></div>';
+            
+            html += '<form id="auth-form" class="space-y-4">';
+            html += '<div><label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Email Address</label><input type="email" id="auth-email" required placeholder="owner@business.com" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-amber-400 transition" /></div>';
+            html += '<div><label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Password</label><input type="password" id="auth-pass" required placeholder="••••••••" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-amber-400 transition" /></div>';
+            html += '<button type="submit" class="w-full bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:brightness-110 text-slate-950 font-extrabold py-3 rounded-xl text-sm transition shadow-lg shadow-amber-500/20">Continue to App Dashboard →</button>';
+            html += '</form>';
+
+            html += '<div class="p-4 bg-slate-950 rounded-2xl border border-slate-800 space-y-2 text-[11px] text-slate-400 text-left">';
+            html += '<div class="font-bold text-slate-200">💎 Pricing & Access Rules:</div>';
+            html += '<div>• First payment required to activate full dashboard features.</div>';
+            html += '<div>• Plans: ₹1,000 / 1 Month • ₹4,000 / 6 Months • ₹5,000 / 12 Months</div>';
+            html += '</div>';
+
+            html += '</div></div>';
+
+            // Footer Disclaimers
+            html += '<footer class="border-t border-slate-800/80 pt-6 text-center text-[11px] text-slate-500 space-y-2 max-w-4xl mx-auto">';
+            html += '<div>© 2026 RevmeAI. Operating on <a href="https://rev.scalezix.com" class="text-amber-400 hover:underline font-semibold">rev.scalezix.com</a></div>';
+            html += '<div class="text-[10px] leading-relaxed text-slate-600">Disclaimer: AI generated review responses are provided as recommendations. Business owners must review and accept content before publishing on Google Business Profiles or third-party review platforms. Subscription payments are processed via Razorpay payment gateway with SSL encryption.</div>';
+            html += '</footer></div>';
+
+            app.innerHTML = html;
+
+            // Bind Demo Form Submission
+            const demoForm = document.getElementById('demo-form');
+            if (demoForm) {
+              demoForm.onsubmit = async function(e) {
+                e.preventDefault();
+                const btn = document.getElementById('demo-submit-btn');
+                const bizName = document.getElementById('demo-biz').value;
+                const rating = document.getElementById('demo-rating').value;
+                const tone = document.getElementById('demo-tone').value;
+                const review = document.getElementById('demo-review').value;
+
+                btn.innerText = 'Generating Sample AI Reply...';
+                try {
+                  const res = await fetch('/api/v1/replies/demo-generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ business_name: bizName, rating, tone, review_text: review })
+                  });
+                  const data = await res.json();
+                  if (data && data.variants && data.variants.length > 0) {
+                    document.getElementById('demo-text').innerText = '"' + data.variants[0].text + '"';
+                    document.getElementById('demo-result').classList.remove('hidden');
+                  }
+                } catch (err) {
+                  console.error(err);
+                }
+                btn.innerText = '✨ Generate Free Demo AI Reply';
+              };
+            }
+
+            // Bind Auth Form Submission
+            document.getElementById('auth-form').onsubmit = async function(e) {
+              e.preventDefault();
+              const email = document.getElementById('auth-email').value;
+              const password = document.getElementById('auth-pass').value;
+
+              try {
+                let res = await fetch('/api/v1/auth/login', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ email, password })
+                });
+
+                if (!res.ok) {
+                  res = await fetch('/api/v1/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                  });
+                }
+
+                if (res.ok) {
+                  const data = await res.json();
+                  localStorage.setItem('replydesk_token', data.token);
+                  initMerchantDashboard();
+                } else {
+                  alert('Authentication failed.');
+                }
+              } catch (err) { console.error(err); }
+            };
+          }
+        }
+      })();
+    </script>
+  </body>
+</html>
+

@@ -1,0 +1,52 @@
+# Binaries and executables
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+server
+/server
+
+# Go environment and tooling
+/go/
+*.out
+*.test
+*.prof
+vendor/
+
+# Local databases and cache directories
+/.cache/
+/pgdata/
+/pgsql/
+
+# Local environment configs
+.env
+.env.*
+!.env.example
+
+# IDEs and editors
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS files
+Thumbs.db
+db.files
+.DS_Store
+/old-frontend
+
+# React frontend environment
+/frontend/node_modules/
+/frontend/dist/
+/frontend/.env.local
+/frontend/.env.*.local
+/frontend/npm-debug.log*
+/frontend/yarn-debug.log*
+/frontend/yarn-error.log*
+/frontend/pnpm-debug.log*
+
+node_modules

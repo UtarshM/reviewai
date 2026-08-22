@@ -1,0 +1,11 @@
+# Written by `rollout`. Anything listed here is not uploaded.
+node_modules
+frontend/node_modules
+frontend/.next
+reply-desk-main
+web-backup
+.env
+.env.*
+*.log
+.DS_Store
+.git

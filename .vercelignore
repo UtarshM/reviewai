@@ -1,0 +1,11 @@
+node_modules
+.env
+*.log
+test_*.js
+debug_*.js
+scratch_*.js
+/tmp
+web-backup
+frontend
+reply-desk-main
+.rollout

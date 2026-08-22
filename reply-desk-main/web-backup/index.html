@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reply Desk — AI-Assisted Review Management</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&family=Outfit:wght@100..900&display=swap" rel="stylesheet">
+    <!-- Vanilla CSS link -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- App Container -->
+    <div id="app" class="app-container">
+        
+        <!-- Auth View (Overlay/Modal) -->
+        <div id="auth-view" class="auth-overlay hidden">
+            <div class="auth-card">
+                <div class="auth-header">
+                    <span class="auth-icon">✍️</span>
+                    <h1>Reply Desk</h1>
+                    <p class="subtitle">AI Correspondence Assistant</p>
+                </div>
+                
+                <!-- Login Form -->
+                <form id="login-form" class="auth-form">
+                    <h2>Sign In</h2>
+                    <div class="form-group">
+                        <label for="login-email">Email Address</label>
+                        <input type="email" id="login-email" required placeholder="name@business.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">Password</label>
+                        <input type="password" id="login-password" required placeholder="••••••••">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Enter Desk</button>
+                    <p class="auth-toggle">New to Reply Desk? <a href="#" id="show-register">Create an account</a></p>
+                </form>
+
+                <!-- Register Form -->
+                <form id="register-form" class="auth-form hidden">
+                    <h2>Create Account</h2>
+                    <div class="form-group">
+                        <label for="register-email">Email Address</label>
+                        <input type="email" id="register-email" required placeholder="name@business.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="register-password">Password (min 6 chars)</label>
+                        <input type="password" id="register-password" required placeholder="••••••••">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Register Account</button>
+                    <p class="auth-toggle">Already have an account? <a href="#" id="show-login">Sign in</a></p>
+                </form>
+                
+                <div id="auth-error" class="error-banner hidden"></div>
+            </div>
+        </div>
+
+        <!-- Main Workspace (Visible only when logged in) -->
+        <div id="workspace" class="workspace hidden">
+            
+            <!-- Global Header / Control Bar -->
+            <header class="desk-header">
+                <div class="header-brand">
+                    <span class="brand-icon">🖋️</span>
+                    <div>
+                        <h1>Reply Desk</h1>
+                        <span class="brand-tag">AI-Assisted Review Management</span>
+                    </div>
+                </div>
+                
+                <div class="header-controls">
+                    <!-- Business Selector -->
+                    <div class="control-group">
+                        <label for="business-select">Active Client Profile:</label>
+                        <div class="select-wrapper">
+                            <select id="business-select">
+                                <option value="">-- Select a Business --</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <button id="btn-new-business" class="btn btn-secondary btn-sm">+ Add Profile</button>
+                    
+                    <!-- User controls -->
+                    <div class="user-profile">
+                        <span id="user-display-email" class="user-email">...</span>
+                        <button id="btn-logout" class="btn btn-text btn-sm">Sign Out</button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Daily Statistics & Pacing Alert Ribbon -->
+            <div id="pacing-ribbon" class="pacing-ribbon hidden">
+                <div class="ribbon-content">
+                    <span class="ribbon-icon">⚠️</span>
+                    <p id="pacing-message">Pacing Alert: You have generated multiple replies today. Spacing replies helps look natural to Google.</p>
+                </div>
+                <div class="ribbon-stats">
+                    <span class="badge badge-outline">Generations Today: <strong id="ribbon-count">0</strong>/20</span>
+                </div>
+            </div>
+
+            <!-- Business Form Modal -->
+            <div id="business-modal" class="modal-overlay hidden">
+                <div class="modal-card">
+                    <div class="modal-header">
+                        <h2 id="business-modal-title">Create Business Profile</h2>
+                        <button class="modal-close" id="btn-close-business-modal">&times;</button>
+                    </div>
+                    <form id="business-form" class="modal-form">
+                        <input type="hidden" id="business-id-input">
+                        <div class="form-group">
+                            <label for="business-name">Business Name</label>
+                            <input type="text" id="business-name" required placeholder="e.g., Corner Bakery Cafe">
+                        </div>
+                        <div class="form-group">
+                            <label for="business-category">Business Category / Industry</label>
+                            <input type="text" id="business-category" required placeholder="e.g., Restaurant & Catering">
+                        </div>
+                        <div class="form-group">
+                            <label for="business-tone">Default Tone Settings</label>
+                            <div class="select-wrapper">
+                                <select id="business-tone">
+                                    <option value="friendly">Warm & Friendly (Default)</option>
+                                    <option value="professional">Polished & Professional</option>
+                                    <option value="empathetic">Empathetic & Attentive</option>
+                                    <option value="direct">Direct & Concise</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="business-review-link">Google Review Business Link</label>
+                            <input type="url" id="business-review-link" placeholder="e.g., https://g.page/r/cX_5Z043XyZEEAE/review">
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="btn btn-secondary" id="btn-cancel-business">Cancel</button>
+                            <button type="submit" class="btn btn-primary" id="btn-submit-business">Save Profile</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Main Folder Desk Container -->
+            <main class="desk-main">
+                
+                <!-- Folder Navigation Tabs -->
+                <nav class="desk-tabs" role="tablist">
+                    <button class="desk-tab active" data-tab="tab-reply" role="tab" aria-selected="true">
+                        <span class="tab-label">Reply to a Review</span>
+                    </button>
+                    <button class="desk-tab" data-tab="tab-review" role="tab" aria-selected="false">
+                        <span class="tab-label">Help Customer Write Review</span>
+                    </button>
+                    <button class="desk-tab" data-tab="tab-history" role="tab" aria-selected="false">
+                        <span class="tab-label">Review History & Log</span>
+                    </button>
+                </nav>
+
+                <!-- Folder Body (Parchment Card) -->
+                <div class="desk-folder-body">
+                    
+                    <!-- No Business Overlay -->
+                    <div id="no-business-overlay" class="empty-state">
+                        <div class="empty-state-icon">🏢</div>
+                        <h2>No Active Business Selected</h2>
+                        <p>To start generating replies or draft reviews, please select a business profile from the dropdown above or create a new one.</p>
+                        <button class="btn btn-primary" id="btn-empty-create-business">Create Business Profile</button>
+                    </div>
+
+                    <div id="workspace-content" class="">
+                        
+                        <!-- TAB: Reply to a Review -->
+                        <section id="tab-reply" class="tab-content">
+                            <div class="grid-container">
+                                <!-- Inputs Form -->
+                                <div class="card form-card">
+                                    <h3>Review Details</h3>
+                                    <form id="reply-generator-form">
+                                        <div class="form-group">
+                                            <label for="reply-customer">Customer Name</label>
+                                            <input type="text" id="reply-customer" required placeholder="e.g., Sarah Jenkins">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Review Star Rating</label>
+                                            <div class="star-rating" id="reply-star-picker">
+                                                <span class="star-picker-icon" data-value="5">★</span>
+                                                <span class="star-picker-icon" data-value="4">★</span>
+                                                <span class="star-picker-icon" data-value="3">★</span>
+                                                <span class="star-picker-icon" data-value="2">★</span>
+                                                <span class="star-picker-icon" data-value="1">★</span>
+                                            </div>
+                                            <input type="hidden" id="reply-rating-value" value="5">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="reply-text">Review Text</label>
+                                            <textarea id="reply-text" rows="5" required placeholder="Paste the customer's raw review here..."></textarea>
+                                        </div>
+                                        <div class="grid-2-col">
+                                            <div class="form-group">
+                                                <label for="reply-tone">Override Tone</label>
+                                                <div class="select-wrapper">
+                                                    <select id="reply-tone">
+                                                        <option value="friendly">Warm & Friendly</option>
+                                                        <option value="professional">Professional</option>
+                                                        <option value="empathetic">Empathetic</option>
+                                                        <option value="direct">Direct / Concise</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="reply-context">Extra Context (Optional)</label>
+                                                <input type="text" id="reply-context" placeholder="e.g., we offered a full refund on this order">
+                                            </div>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary btn-block" id="btn-generate-replies">Generate Draft Replies</button>
+                                    </form>
+                                </div>
+                                
+                                <!-- Variants Results Output -->
+                                <div class="card results-card">
+                                    <div class="results-header">
+                                        <h3>Generated Draft Options</h3>
+                                        <span class="results-hint">Choose a draft to copy and track</span>
+                                    </div>
+                                    <div id="reply-loading" class="spinner-overlay hidden">
+                                        <div class="spinner"></div>
+                                        <p>Generating draft variants on the desk...</p>
+                                    </div>
+                                    <div id="reply-error" class="error-banner hidden"></div>
+                                    <div id="reply-placeholder" class="results-placeholder">
+                                        <span class="placeholder-icon">✉️</span>
+                                        <p>Complete the review details and click Generate to see 3 tailored draft options.</p>
+                                    </div>
+                                    <div id="reply-variants-container" class="variants-container hidden">
+                                        <!-- Javascript will inject 3 variant cards here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- TAB: Help a Customer Write a Review -->
+                        <section id="tab-review" class="tab-content hidden">
+                            <div class="grid-container">
+                                <!-- Inputs Form -->
+                                <div class="card form-card">
+                                    <h3>Customer Experience Intake</h3>
+                                    <form id="review-generator-form">
+                                        <div class="form-group">
+                                            <label>Target Star Rating</label>
+                                            <div class="star-rating" id="review-star-picker">
+                                                <span class="star-picker-icon" data-value="5">★</span>
+                                                <span class="star-picker-icon" data-value="4">★</span>
+                                                <span class="star-picker-icon" data-value="3">★</span>
+                                                <span class="star-picker-icon" data-value="2">★</span>
+                                                <span class="star-picker-icon" data-value="1">★</span>
+                                            </div>
+                                            <input type="hidden" id="review-rating-value" value="5">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="review-liked">What did the customer like?</label>
+                                            <textarea id="review-liked" rows="3" required placeholder="e.g., the sourdough bread, very fast service, friendly cashier"></textarea>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="review-disliked">What did they dislike? (Optional)</label>
+                                            <textarea id="review-disliked" rows="3" placeholder="e.g., parking was a bit tight, table was wobbly"></textarea>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="review-tone">Tone / Voice</label>
+                                            <div class="select-wrapper">
+                                                <select id="review-tone">
+                                                    <option value="friendly">Casual & Friendly</option>
+                                                    <option value="professional">Polished / Business-like</option>
+                                                    <option value="direct">Direct & Plainspoken</option>
+                                                    <option value="empathetic">Enthusiastic</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary btn-block" id="btn-generate-reviews">Generate Review Drafts</button>
+                                    </form>
+                                </div>
+                                
+                                <!-- Variants Results Output -->
+                                <div class="card results-card">
+                                    <div class="results-header">
+                                        <h3>Generated Review Drafts</h3>
+                                        <span class="results-hint">Hand a variant to the customer to edit or post</span>
+                                    </div>
+                                    <div id="review-loading" class="spinner-overlay hidden">
+                                        <div class="spinner"></div>
+                                        <p>Drafting review options in customer's voice...</p>
+                                    </div>
+                                    <div id="review-error" class="error-banner hidden"></div>
+                                    <div id="review-placeholder" class="results-placeholder">
+                                        <span class="placeholder-icon">📝</span>
+                                        <p>Fill in what the customer liked and experienced, then click Generate to draft 3 honest variants.</p>
+                                    </div>
+                                    <div id="review-variants-container" class="variants-container hidden">
+                                        <!-- Javascript will inject 3 variant cards here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- TAB: Review History & Log -->
+                        <section id="tab-history" class="tab-content hidden">
+                            <div class="card history-card">
+                                <div class="history-header">
+                                    <div>
+                                        <h3>Correspondence History Log</h3>
+                                        <p class="history-sub">View, edit, and update the status of past replies and review generations</p>
+                                    </div>
+                                    <div class="history-actions">
+                                        <button id="btn-refresh-history" class="btn btn-secondary btn-sm">↺ Refresh</button>
+                                    </div>
+                                </div>
+                                
+                                <div id="history-loading" class="spinner-overlay hidden">
+                                    <div class="spinner"></div>
+                                    <p>Opening history logbook...</p>
+                                </div>
+                                
+                                <div id="history-error" class="error-banner hidden"></div>
+                                
+                                <div id="history-empty" class="empty-state">
+                                    <div class="empty-state-icon">📂</div>
+                                    <h2>No History Yet</h2>
+                                    <p>Generations for this business profile will be tracked and stored here.</p>
+                                </div>
+
+                                <div id="history-list" class="history-list hidden">
+                                    <!-- Javascript will inject history log items here -->
+                                </div>
+
+                                <!-- Pagination Controls -->
+                                <div id="history-pagination" class="history-pagination hidden">
+                                    <button id="btn-prev-page" class="btn btn-secondary btn-sm">&larr; Newer Entries</button>
+                                    <span id="page-indicator">Page 1</span>
+                                    <button id="btn-next-page" class="btn btn-secondary btn-sm">Older Entries &rarr;</button>
+                                </div>
+                            </div>
+                        </section>
+
+                    </div>
+                </div>
+            </main>
+
+        </div>
+    </div>
+    
+    <!-- Script tag -->
+    <script src="app.js"></script>
+</body>
+</html>
