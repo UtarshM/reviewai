@@ -328,6 +328,7 @@
 
         // --- MERCHANT DASHBOARD ---
         async function initMerchantDashboard() {
+          document.body.className = "bg-slate-950 text-slate-100 min-h-screen selection:bg-amber-500 selection:text-slate-950 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(245,158,11,0.12),rgba(255,255,255,0))]";
           const app = document.getElementById('app');
           const token = localStorage.getItem('replydesk_token');
 
@@ -751,90 +752,233 @@
           }
 
           function renderLogin() {
-            let html = '<div class="min-h-screen py-10 px-4 max-w-5xl mx-auto flex flex-col justify-between space-y-12">';
+            document.body.className = "bg-slate-50 text-slate-900 min-h-screen selection:bg-amber-500 selection:text-slate-950 antialiased";
             
-            // Header branding
-            html += '<header class="flex items-center justify-between"><div class="flex items-center gap-3"><div class="w-10 h-10 bg-gradient-to-tr from-amber-500 to-amber-400 text-slate-950 rounded-xl flex items-center justify-center font-extrabold text-xl shadow-lg shadow-amber-500/20 font-heading">R</div><div><h1 class="font-extrabold text-white text-lg leading-none font-heading">RevmeAI</h1><p class="text-[11px] text-amber-400 font-semibold mt-0.5">rev.scalezix.com</p></div></div><span class="text-xs text-slate-400 bg-slate-900 px-3 py-1.5 rounded-full border border-slate-800">🔒 256-Bit SSL Secured</span></header>';
+            let html = '<div class="min-h-screen flex flex-col justify-between scroll-smooth">';
+            
+            // 1. Sticky Glass Navbar
+            html += '<header class="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-200 px-4 sm:px-8 py-3.5">';
+            html += '<div class="max-w-7xl mx-auto flex items-center justify-between">';
+            html += '<div class="flex items-center gap-3"><div class="w-10 h-10 bg-gradient-to-tr from-amber-500 to-amber-400 text-slate-950 rounded-xl flex items-center justify-center font-extrabold text-xl shadow-md shadow-amber-500/20 font-heading">R</div><div><h1 class="font-extrabold text-slate-900 text-lg leading-none font-heading">RevmeAI</h1><p class="text-[11px] text-amber-600 font-semibold mt-0.5">rev.scalezix.com</p></div></div>';
+            
+            // Nav Links
+            html += '<nav class="hidden md:flex items-center gap-8 text-xs font-bold text-slate-600">';
+            html += '<a href="#features" class="hover:text-amber-600 transition">Features</a>';
+            html += '<a href="#how-it-works" class="hover:text-amber-600 transition">How It Works</a>';
+            html += '<a href="#pricing" class="hover:text-amber-600 transition">Pricing</a>';
+            html += '<a href="#faq" class="hover:text-amber-600 transition">FAQ</a>';
+            html += '</nav>';
 
-            // Main 2-Column Grid (Left: Interactive Demo Sandbox, Right: Account Sign In / Sign Up)
-            html += '<div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">';
-            
-            // Left Column: Interactive Live Demo Sandbox
-            html += '<div class="glass-card rounded-3xl p-6 md:p-8 space-y-5 border border-amber-500/30 shadow-2xl relative bg-amber-500/5">';
-            html += '<div><span class="text-[10px] font-extrabold text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full uppercase border border-amber-500/20 tracking-wider">⚡ Instant Live Demo</span><h2 class="text-2xl font-extrabold text-white font-heading mt-2">Test AI Review Reply</h2><p class="text-xs text-slate-400 leading-relaxed">Try our AI review reply generator in real-time before signing up!</p></div>';
-            
-            html += '<form id="demo-form" class="space-y-3.5">';
-            html += '<div><label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Business Name</label><input type="text" id="demo-biz" value="Artisan Bakery & Cafe" class="w-full bg-slate-950/90 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-amber-400 transition" /></div>';
-            html += '<div class="grid grid-cols-2 gap-3">';
-            html += '<div><label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Rating</label><select id="demo-rating" class="w-full bg-slate-950/90 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-400"><option value="5">5 ★★★★★ (Positive)</option><option value="3">3 ★★★ (Mixed)</option><option value="1">1 ★ (Critical)</option></select></div>';
-            html += '<div><label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Tone</label><select id="demo-tone" class="w-full bg-slate-950/90 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-400"><option value="friendly">Friendly & Warm</option><option value="professional">Professional</option><option value="empathetic">Empathetic</option></select></div>';
-            html += '</div>';
-            html += '<div><label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Customer Review</label><textarea id="demo-review" rows="2" class="w-full bg-slate-950/90 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-amber-400 resize-none">Amazing croissants and friendly staff! Will definitely come back.</textarea></div>';
-            html += '<button type="submit" id="demo-submit-btn" class="w-full bg-gradient-to-r from-amber-500 to-amber-400 text-slate-950 font-extrabold py-3 rounded-xl text-xs transition shadow-lg shadow-amber-500/20">✨ Generate Free Demo AI Reply</button>';
-            html += '</form>';
+            // Header Action Buttons
+            html += '<div class="flex items-center gap-3">';
+            html += '<a href="#auth" class="text-xs font-extrabold text-slate-700 hover:text-slate-900 px-3.5 py-2 rounded-xl hover:bg-slate-100 transition">Sign In</a>';
+            html += '<a href="#auth" class="bg-gradient-to-r from-amber-500 to-amber-400 hover:brightness-105 text-slate-950 font-extrabold px-4 py-2 rounded-xl text-xs shadow-md shadow-amber-500/20 transition">Get Started →</a>';
+            html += '</div></div></header>';
 
-            html += '<div id="demo-result" class="hidden bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-3 text-left">';
-            html += '<div class="flex items-center justify-between"><span class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">Generated AI Response</span><span class="text-[9px] bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded">Demo Preview</span></div>';
-            html += '<p id="demo-text" class="text-xs text-slate-200 leading-relaxed font-normal italic"></p>';
-            html += '<div class="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-[11px] text-amber-300 font-medium">💡 Sign up and choose a plan to connect your Google Business Profile & automate replies.</div>';
-            html += '</div>';
+            // 2. Hero Section (White Theme)
+            html += '<section class="py-16 md:py-24 px-4 max-w-6xl mx-auto text-center space-y-8">';
+            html += '<div class="inline-flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-700 px-4 py-1.5 rounded-full text-xs font-bold shadow-sm"><span class="animate-pulse">⚡</span> AI-Powered Reputation Operating System for Local Businesses</div>';
+            
+            html += '<h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold text-slate-900 font-heading tracking-tight leading-[1.15] max-w-4xl mx-auto">Automate Google Business Reviews & <span class="bg-gradient-to-r from-amber-600 to-amber-500 bg-clip-text text-transparent">AI Replies</span> in Seconds</h1>';
+            
+            html += '<p class="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed font-normal">Turn happy customers into glowing Google reviews, filter negative feedback privately, and auto-generate personalized AI responses with Llama 3 — all on autopilot.</p>';
+
+            html += '<div class="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">';
+            html += '<a href="#auth" class="w-full sm:w-auto bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:brightness-110 text-slate-950 font-extrabold px-8 py-4 rounded-2xl text-sm shadow-xl shadow-amber-500/20 transition transform hover:-translate-y-0.5">🚀 Start Free Trial / Sign In →</a>';
+            html += '<a href="#pricing" class="w-full sm:w-auto bg-white border border-slate-300 hover:border-slate-400 text-slate-700 font-bold px-8 py-4 rounded-2xl text-sm shadow-sm hover:bg-slate-50 transition">💎 View Pricing Plans</a>';
             html += '</div>';
 
-            // Right Column: Sign In / Register Form
-            html += '<div class="glass-card rounded-3xl p-6 md:p-8 shadow-2xl space-y-6">';
-            html += '<div class="text-center space-y-2"><h2 class="text-2xl font-bold text-white font-heading">Sign In / Register</h2><p class="text-xs text-slate-400">Access your RevmeAI Merchant Dashboard</p></div>';
-            
+            // Trust Stats Bar
+            html += '<div class="pt-8 border-t border-slate-200/80 max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 text-center">';
+            html += '<div><div class="text-2xl font-extrabold text-slate-900 font-heading">500+</div><div class="text-xs text-slate-500 font-medium">Local Stores Active</div></div>';
+            html += '<div><div class="text-2xl font-extrabold text-amber-600 font-heading">100k+</div><div class="text-xs text-slate-500 font-medium">AI Replies Drafted</div></div>';
+            html += '<div><div class="text-2xl font-extrabold text-slate-900 font-heading">4.9 ★</div><div class="text-xs text-slate-500 font-medium">Average Rating Boost</div></div>';
+            html += '<div><div class="text-2xl font-extrabold text-slate-900 font-heading">24/7</div><div class="text-xs text-slate-500 font-medium">Automated Response</div></div>';
+            html += '</div></section>';
+
+            // 3. Features Section (#features)
+            html += '<section id="features" class="py-16 bg-white border-y border-slate-200 px-4">';
+            html += '<div class="max-w-6xl mx-auto space-y-12">';
+            html += '<div class="text-center space-y-3 max-w-2xl mx-auto">';
+            html += '<span class="text-xs font-extrabold uppercase tracking-wider text-amber-600 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full">Core Features</span>';
+            html += '<h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 font-heading">Everything You Need to Dominate Local Reviews</h2>';
+            html += '<p class="text-sm text-slate-600">Built specifically for restaurants, cafes, salons, clinics, and local service providers.</p>';
+            html += '</div>';
+
+            html += '<div class="grid grid-cols-1 md:grid-cols-3 gap-8">';
+            // Feature 1
+            html += '<div class="bg-slate-50 border border-slate-200 rounded-3xl p-8 space-y-4 hover:border-amber-400 hover:shadow-lg transition-all duration-300">';
+            html += '<div class="w-12 h-12 bg-amber-500/10 text-amber-600 rounded-2xl flex items-center justify-center text-2xl font-bold">🤖</div>';
+            html += '<h3 class="text-xl font-bold text-slate-900 font-heading">Llama 3 AI Review Assistant</h3>';
+            html += '<p class="text-xs text-slate-600 leading-relaxed">Generates human-sounding, context-aware responses tailored to rating, sentiment, and your brand voice (Friendly, Professional, or Empathetic).</p>';
+            html += '</div>';
+            // Feature 2
+            html += '<div class="bg-slate-50 border border-slate-200 rounded-3xl p-8 space-y-4 hover:border-amber-400 hover:shadow-lg transition-all duration-300">';
+            html += '<div class="w-12 h-12 bg-amber-500/10 text-amber-600 rounded-2xl flex items-center justify-center text-2xl font-bold">📲</div>';
+            html += '<h3 class="text-xl font-bold text-slate-900 font-heading">QR Code Review Collector</h3>';
+            html += '<p class="text-xs text-slate-600 leading-relaxed">Generate printable QR standees for your counter. Customers scan & leave 5-star Google reviews in 10 seconds flat.</p>';
+            html += '</div>';
+            // Feature 3
+            html += '<div class="bg-slate-50 border border-slate-200 rounded-3xl p-8 space-y-4 hover:border-amber-400 hover:shadow-lg transition-all duration-300">';
+            html += '<div class="w-12 h-12 bg-amber-500/10 text-amber-600 rounded-2xl flex items-center justify-center text-2xl font-bold">🛡️</div>';
+            html += '<h3 class="text-xl font-bold text-slate-900 font-heading">Private Feedback Shield</h3>';
+            html += '<p class="text-xs text-slate-600 leading-relaxed">Divert 1 to 3-star complaints to a private owner feedback inbox before they land on Google, protecting your public rating.</p>';
+            html += '</div>';
+            // Feature 4
+            html += '<div class="bg-slate-50 border border-slate-200 rounded-3xl p-8 space-y-4 hover:border-amber-400 hover:shadow-lg transition-all duration-300">';
+            html += '<div class="w-12 h-12 bg-amber-500/10 text-amber-600 rounded-2xl flex items-center justify-center text-2xl font-bold">📍</div>';
+            html += '<h3 class="text-xl font-bold text-slate-900 font-heading">Google Business Profile Sync</h3>';
+            html += '<p class="text-xs text-slate-600 leading-relaxed">Seamlessly link your Google Business Profiles. Import new incoming reviews and publish verified responses automatically.</p>';
+            html += '</div>';
+            // Feature 5
+            html += '<div class="bg-slate-50 border border-slate-200 rounded-3xl p-8 space-y-4 hover:border-amber-400 hover:shadow-lg transition-all duration-300">';
+            html += '<div class="w-12 h-12 bg-amber-500/10 text-amber-600 rounded-2xl flex items-center justify-center text-2xl font-bold">📊</div>';
+            html += '<h3 class="text-xl font-bold text-slate-900 font-heading">Reputation & SEO Analytics</h3>';
+            html += '<p class="text-xs text-slate-600 leading-relaxed">Monitor monthly rating trends, response speed, customer satisfaction metrics, and local Google SEO ranking scores.</p>';
+            html += '</div>';
+            // Feature 6
+            html += '<div class="bg-slate-50 border border-slate-200 rounded-3xl p-8 space-y-4 hover:border-amber-400 hover:shadow-lg transition-all duration-300">';
+            html += '<div class="w-12 h-12 bg-amber-500/10 text-amber-600 rounded-2xl flex items-center justify-center text-2xl font-bold">🔒</div>';
+            html += '<h3 class="text-xl font-bold text-slate-900 font-heading">256-Bit SSL Enterprise Security</h3>';
+            html += '<p class="text-xs text-slate-600 leading-relaxed">Bank-grade data encryption, automated Supabase cloud database sync, and guaranteed 99.9% platform uptime.</p>';
+            html += '</div>';
+            html += '</div></div></section>';
+
+            // 4. How It Works Section (#how-it-works)
+            html += '<section id="how-it-works" class="py-16 px-4 max-w-6xl mx-auto space-y-12">';
+            html += '<div class="text-center space-y-3 max-w-2xl mx-auto">';
+            html += '<span class="text-xs font-extrabold uppercase tracking-wider text-amber-600 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full">Simple Process</span>';
+            html += '<h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 font-heading">How RevmeAI Works in 3 Steps</h2>';
+            html += '<p class="text-sm text-slate-600">Get your business setup and automating Google reviews in under 2 minutes.</p>';
+            html += '</div>';
+
+            html += '<div class="grid grid-cols-1 md:grid-cols-3 gap-8 relative">';
+            // Step 1
+            html += '<div class="bg-white border border-slate-200 rounded-3xl p-8 space-y-4 shadow-sm relative">';
+            html += '<div class="w-10 h-10 bg-amber-500 text-slate-950 font-extrabold rounded-2xl flex items-center justify-center text-lg font-heading shadow-md">1</div>';
+            html += '<h3 class="text-xl font-bold text-slate-900 font-heading">Connect Store Profile</h3>';
+            html += '<p class="text-xs text-slate-600 leading-relaxed">Sign up and enter your business name, category, and Google Business review link in 30 seconds.</p>';
+            html += '</div>';
+            // Step 2
+            html += '<div class="bg-white border border-slate-200 rounded-3xl p-8 space-y-4 shadow-sm relative">';
+            html += '<div class="w-10 h-10 bg-amber-500 text-slate-950 font-extrabold rounded-2xl flex items-center justify-center text-lg font-heading shadow-md">2</div>';
+            html += '<h3 class="text-xl font-bold text-slate-900 font-heading">Set AI Voice & Tone</h3>';
+            html += '<p class="text-xs text-slate-600 leading-relaxed">Configure your preferred AI response tone — Warm & Friendly, Professional, or Empathetic.</p>';
+            html += '</div>';
+            // Step 3
+            html += '<div class="bg-white border border-slate-200 rounded-3xl p-8 space-y-4 shadow-sm relative">';
+            html += '<div class="w-10 h-10 bg-amber-500 text-slate-950 font-extrabold rounded-2xl flex items-center justify-center text-lg font-heading shadow-md">3</div>';
+            html += '<h3 class="text-xl font-bold text-slate-900 font-heading">Auto-Pilot Growth</h3>';
+            html += '<p class="text-xs text-slate-600 leading-relaxed">RevmeAI automatically drafts 5-star replies and collects new positive reviews to boost local Google SEO.</p>';
+            html += '</div>';
+            html += '</div></section>';
+
+            // 5. Pricing Section (#pricing)
+            html += '<section id="pricing" class="py-16 bg-white border-y border-slate-200 px-4">';
+            html += '<div class="max-w-6xl mx-auto space-y-12">';
+            html += '<div class="text-center space-y-3 max-w-2xl mx-auto">';
+            html += '<span class="text-xs font-extrabold uppercase tracking-wider text-amber-600 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full">Flexible Access Plans</span>';
+            html += '<h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 font-heading">Simple, Transparent Pricing</h2>';
+            html += '<p class="text-sm text-slate-600">No hidden fees. Select the plan that matches your growth goals.</p>';
+            html += '</div>';
+
+            html += '<div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">';
+            // Plan 1: 1 Month
+            html += '<div class="bg-slate-50 border border-slate-200 rounded-3xl p-8 flex flex-col justify-between hover:shadow-lg transition space-y-6">';
+            html += '<div class="space-y-4">';
+            html += '<span class="text-[10px] font-bold text-amber-700 bg-amber-100 px-3 py-1 rounded-full uppercase tracking-wider">Starter</span>';
+            html += '<h3 class="text-2xl font-extrabold text-slate-900 font-heading">1 Month Access</h3>';
+            html += '<div class="text-4xl font-extrabold text-slate-900 font-heading">₹1,000 <span class="text-xs text-slate-500 font-normal">/ month</span></div>';
+            html += '<p class="text-xs text-slate-600 leading-relaxed">Perfect for single stores looking to test automated review management.</p>';
+            html += '<ul class="space-y-2.5 text-xs text-slate-700 font-medium pt-2 border-t border-slate-200">';
+            html += '<li class="flex items-center gap-2"><span class="text-amber-600 font-bold">✓</span> 1 Business Profile</li>';
+            html += '<li class="flex items-center gap-2"><span class="text-amber-600 font-bold">✓</span> Unlimited AI Review Replies</li>';
+            html += '<li class="flex items-center gap-2"><span class="text-amber-600 font-bold">✓</span> QR Code Collector Generator</li>';
+            html += '<li class="flex items-center gap-2"><span class="text-amber-600 font-bold">✓</span> Private Feedback Shield</li>';
+            html += '</ul></div>';
+            html += '<a href="#auth" class="w-full text-center bg-slate-900 hover:bg-slate-800 text-white font-bold py-3.5 rounded-2xl text-xs transition shadow-md">Select 1 Month Plan →</a>';
+            html += '</div>';
+
+            // Plan 2: 6 Months (Popular)
+            html += '<div class="bg-gradient-to-b from-amber-500/10 to-white border-2 border-amber-400 rounded-3xl p-8 flex flex-col justify-between shadow-xl relative space-y-6">';
+            html += '<div class="absolute -top-3.5 right-6 bg-gradient-to-r from-amber-500 to-amber-400 text-slate-950 text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider shadow-md">Most Popular</div>';
+            html += '<div class="space-y-4">';
+            html += '<span class="text-[10px] font-bold text-amber-800 bg-amber-200/80 px-3 py-1 rounded-full uppercase tracking-wider">Semi-Annual</span>';
+            html += '<h3 class="text-2xl font-extrabold text-slate-900 font-heading">6 Months Access</h3>';
+            html += '<div class="text-4xl font-extrabold text-slate-900 font-heading">₹4,000 <span class="text-xs text-slate-500 font-normal">/ 6 months</span></div>';
+            html += '<p class="text-xs text-emerald-700 font-bold">🔥 Save ₹2,000 compared to monthly rate!</p>';
+            html += '<ul class="space-y-2.5 text-xs text-slate-700 font-medium pt-2 border-t border-amber-200/60">';
+            html += '<li class="flex items-center gap-2"><span class="text-amber-600 font-bold">✓</span> Everything in 1 Month Plan</li>';
+            html += '<li class="flex items-center gap-2"><span class="text-amber-600 font-bold">✓</span> Multi-Location Franchise Support</li>';
+            html += '<li class="flex items-center gap-2"><span class="text-amber-600 font-bold">✓</span> AI Google Business Posts</li>';
+            html += '<li class="flex items-center gap-2"><span class="text-amber-600 font-bold">✓</span> Priority AI Generation Engine</li>';
+            html += '</ul></div>';
+            html += '<a href="#auth" class="w-full text-center bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:brightness-110 text-slate-950 font-extrabold py-3.5 rounded-2xl text-xs transition shadow-lg shadow-amber-500/20">Select 6 Months Plan →</a>';
+            html += '</div>';
+
+            // Plan 3: 12 Months (Best Value)
+            html += '<div class="bg-slate-50 border border-slate-200 rounded-3xl p-8 flex flex-col justify-between hover:shadow-lg transition space-y-6">';
+            html += '<div class="space-y-4">';
+            html += '<span class="text-[10px] font-bold text-amber-700 bg-amber-100 px-3 py-1 rounded-full uppercase tracking-wider">Annual Access</span>';
+            html += '<h3 class="text-2xl font-extrabold text-slate-900 font-heading">12 Months Access</h3>';
+            html += '<div class="text-4xl font-extrabold text-amber-600 font-heading">₹5,000 <span class="text-xs text-slate-500 font-normal">/ 12 months</span></div>';
+            html += '<p class="text-xs text-emerald-700 font-bold">🏆 Save ₹7,000! (Just ₹416/month)</p>';
+            html += '<ul class="space-y-2.5 text-xs text-slate-700 font-medium pt-2 border-t border-slate-200">';
+            html += '<li class="flex items-center gap-2"><span class="text-amber-600 font-bold">✓</span> Everything in 6-Month Plan</li>';
+            html += '<li class="flex items-center gap-2"><span class="text-amber-600 font-bold">✓</span> Local SEO Google Scoreboard</li>';
+            html += '<li class="flex items-center gap-2"><span class="text-amber-600 font-bold">✓</span> Custom Tone Fine-Tuning</li>';
+            html += '<li class="flex items-center gap-2"><span class="text-amber-600 font-bold">✓</span> 24/7 VIP Priority Support</li>';
+            html += '</ul></div>';
+            html += '<a href="#auth" class="w-full text-center bg-slate-900 hover:bg-slate-800 text-white font-bold py-3.5 rounded-2xl text-xs transition shadow-md">Select Annual Plan →</a>';
+            html += '</div>';
+            html += '</div></div></section>';
+
+            // 6. Interactive Auth Section (#auth)
+            html += '<section id="auth" class="py-16 px-4 max-w-5xl mx-auto">';
+            html += '<div class="max-w-md w-full mx-auto space-y-6">';
+            html += '<div class="text-center space-y-2">';
+            html += '<span class="text-xs font-extrabold uppercase tracking-wider text-amber-600 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full">Dashboard Access</span>';
+            html += '<h2 class="text-3xl font-extrabold text-slate-900 font-heading">Sign In / Register</h2>';
+            html += '<p class="text-xs text-slate-600">Enter your credentials to access your RevmeAI Merchant Dashboard</p>';
+            html += '</div>';
+
+            html += '<div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-xl space-y-6">';
             html += '<form id="auth-form" class="space-y-4">';
-            html += '<div><label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Email Address</label><input type="email" id="auth-email" required placeholder="owner@business.com" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-amber-400 transition" /></div>';
-            html += '<div><label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Password</label><input type="password" id="auth-pass" required placeholder="••••••••" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-amber-400 transition" /></div>';
-            html += '<button type="submit" class="w-full bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:brightness-110 text-slate-950 font-extrabold py-3 rounded-xl text-sm transition shadow-lg shadow-amber-500/20">Continue to App Dashboard →</button>';
+            html += '<div><label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Email Address</label><input type="email" id="auth-email" required placeholder="owner@business.com" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-amber-500 focus:bg-white transition" /></div>';
+            html += '<div><label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Password</label><input type="password" id="auth-pass" required placeholder="••••••••" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-amber-500 focus:bg-white transition" /></div>';
+            html += '<button type="submit" class="w-full bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:brightness-105 text-slate-950 font-extrabold py-3.5 rounded-xl text-sm transition shadow-lg shadow-amber-500/20">Continue to App Dashboard →</button>';
             html += '</form>';
 
-            html += '<div class="p-4 bg-slate-950 rounded-2xl border border-slate-800 space-y-2 text-[11px] text-slate-400 text-left">';
-            html += '<div class="font-bold text-slate-200">💎 Pricing & Access Rules:</div>';
+            html += '<div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-1.5 text-[11px] text-slate-600 text-left">';
+            html += '<div class="font-bold text-slate-900">💎 Account Access & Pricing:</div>';
             html += '<div>• First payment required to activate full dashboard features.</div>';
-            html += '<div>• Plans: ₹1,000 / 1 Month • ₹4,000 / 6 Months • ₹5,000 / 12 Months</div>';
+            html += '<div>• Plans: ₹1,000 / 1 Mo • ₹4,000 / 6 Mo • ₹5,000 / 12 Mo</div>';
+            html += '</div></div></div></section>';
+
+            // 7. FAQ Section (#faq)
+            html += '<section id="faq" class="py-16 bg-white border-t border-slate-200 px-4">';
+            html += '<div class="max-w-4xl mx-auto space-y-10">';
+            html += '<div class="text-center space-y-3">';
+            html += '<span class="text-xs font-extrabold uppercase tracking-wider text-amber-600 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full">FAQ</span>';
+            html += '<h2 class="text-3xl font-extrabold text-slate-900 font-heading">Frequently Asked Questions</h2>';
             html += '</div>';
 
-            html += '</div></div>';
+            html += '<div class="space-y-4">';
+            html += '<div class="bg-slate-50 border border-slate-200 rounded-2xl p-6 space-y-2"><h4 class="font-bold text-slate-900 text-sm">How does RevmeAI generate review replies?</h4><p class="text-xs text-slate-600 leading-relaxed">RevmeAI uses fine-tuned Llama 3 models trained specifically on local business customer service standards. It creates human-like, tone-accurate responses for positive, mixed, and critical reviews.</p></div>';
+            html += '<div class="bg-slate-50 border border-slate-200 rounded-2xl p-6 space-y-2"><h4 class="font-bold text-slate-900 text-sm">How does the QR Code collector work?</h4><p class="text-xs text-slate-600 leading-relaxed">You get a unique printable QR code for your store counter. When customers scan it, happy customers (4-5 stars) are directed straight to your Google review link, while mixed/negative feedback (1-3 stars) is sent privately to your owner inbox.</p></div>';
+            html += '<div class="bg-slate-50 border border-slate-200 rounded-2xl p-6 space-y-2"><h4 class="font-bold text-slate-900 text-sm">Can I manage multiple business locations?</h4><p class="text-xs text-slate-600 leading-relaxed">Yes! Our 6-Month and 12-Month access plans support multi-location business management and multi-branch franchises from a single unified dashboard.</p></div>';
+            html += '<div class="bg-slate-50 border border-slate-200 rounded-2xl p-6 space-y-2"><h4 class="font-bold text-slate-900 text-sm">What payment options are supported?</h4><p class="text-xs text-slate-600 leading-relaxed">All subscription payments are securely processed via Razorpay. We support UPI (Google Pay, PhonePe, Paytm), Credit/Debit Cards, and NetBanking with SSL encryption.</p></div>';
+            html += '</div></div></section>';
 
-            // Footer Disclaimers
-            html += '<footer class="border-t border-slate-800/80 pt-6 text-center text-[11px] text-slate-500 space-y-2 max-w-4xl mx-auto">';
-            html += '<div>© 2026 RevmeAI. Operating on <a href="https://rev.scalezix.com" class="text-amber-400 hover:underline font-semibold">rev.scalezix.com</a></div>';
-            html += '<div class="text-[10px] leading-relaxed text-slate-600">Disclaimer: AI generated review responses are provided as recommendations. Business owners must review and accept content before publishing on Google Business Profiles or third-party review platforms. Subscription payments are processed via Razorpay payment gateway with SSL encryption.</div>';
-            html += '</footer></div>';
+            // 8. Footer
+            html += '<footer class="border-t border-slate-200 bg-slate-900 text-slate-400 py-12 px-4 text-xs">';
+            html += '<div class="max-w-6xl mx-auto space-y-6 text-center">';
+            html += '<div class="flex items-center justify-center gap-3"><div class="w-8 h-8 bg-gradient-to-tr from-amber-500 to-amber-400 text-slate-950 rounded-xl flex items-center justify-center font-extrabold text-base shadow-md font-heading">R</div><span class="font-extrabold text-white text-base font-heading">RevmeAI</span></div>';
+            html += '<div>© 2026 RevmeAI. Operating live on <a href="https://rev.scalezix.com" class="text-amber-400 hover:underline font-semibold">rev.scalezix.com</a></div>';
+            html += '<p class="text-[10px] leading-relaxed text-slate-500 max-w-3xl mx-auto">Disclaimer: AI generated review responses are provided as recommendations. Business owners must review content before publishing on Google Business Profiles or third-party review platforms. Payments are processed via Razorpay payment gateway with 256-bit SSL encryption.</p>';
+            html += '</div></footer></div>';
 
             app.innerHTML = html;
-
-            // Bind Demo Form Submission
-            const demoForm = document.getElementById('demo-form');
-            if (demoForm) {
-              demoForm.onsubmit = async function(e) {
-                e.preventDefault();
-                const btn = document.getElementById('demo-submit-btn');
-                const bizName = document.getElementById('demo-biz').value;
-                const rating = document.getElementById('demo-rating').value;
-                const tone = document.getElementById('demo-tone').value;
-                const review = document.getElementById('demo-review').value;
-
-                btn.innerText = 'Generating Sample AI Reply...';
-                try {
-                  const res = await fetch('/api/v1/replies/demo-generate', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ business_name: bizName, rating, tone, review_text: review })
-                  });
-                  const data = await res.json();
-                  if (data && data.variants && data.variants.length > 0) {
-                    document.getElementById('demo-text').innerText = '"' + data.variants[0].text + '"';
-                    document.getElementById('demo-result').classList.remove('hidden');
-                  }
-                } catch (err) {
-                  console.error(err);
-                }
-                btn.innerText = '✨ Generate Free Demo AI Reply';
-              };
-            }
 
             // Bind Auth Form Submission
             document.getElementById('auth-form').onsubmit = async function(e) {
