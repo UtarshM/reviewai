@@ -89,7 +89,7 @@ router.post('/create-public-order', async (req, res) => {
     await query(
       `INSERT INTO pending_accounts (email, phone, password, business_name, plan, amount, order_id, coupon_code, status)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'order_created')`,
-      [cleanEmail, cleanPhone, password || '', cleanBiz, plan || '1_month', finalAmount / 100, orderId, coupon_code || null, 'order_created']
+      [cleanEmail, cleanPhone, password || '', cleanBiz, plan || '1_month', finalAmount / 100, orderId, coupon_code || null]
     );
 
     return res.status(200).json({
@@ -158,6 +158,11 @@ router.post('/verify-public-payment', async (req, res) => {
     return res.status(500).json({ error: 'server_error', message: 'Failed to verify public payment' });
   }
 });
+
+// ----------------------------------------------------------------------
+// AUTHENTICATED PAYMENT ROUTES (all routes below require JWT auth)
+// ----------------------------------------------------------------------
+router.use(authMiddleware);
 
 // GET /api/v1/payments/admin/pending-accounts
 router.get('/admin/pending-accounts', async (req, res) => {
@@ -230,11 +235,6 @@ router.post('/admin/approve-account', async (req, res) => {
     return res.status(500).json({ error: 'server_error', message: 'Failed to approve account' });
   }
 });
-
-// ----------------------------------------------------------------------
-// AUTHENTICATED PAYMENT ROUTES
-// ----------------------------------------------------------------------
-router.use(authMiddleware);
 
 // GET /api/v1/payments/status - Get current user subscription status
 router.get('/status', async (req, res) => {
