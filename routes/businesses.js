@@ -29,6 +29,27 @@ router.post('/', async (req, res) => {
     const userId = req.userId;
     const { name, category, tone_default, google_review_link, city, state, country } = req.body;
 
+    // Verify user has an active or pending paid subscription before allowing profile creation
+    const subRes = await query(
+      "SELECT id, status, expires_at FROM subscriptions WHERE user_id = $1 AND status IN ('active', 'paid_pending_manual_approval')",
+      [userId]
+    );
+
+    let hasValidSub = false;
+    if (subRes.rows && subRes.rows.length > 0) {
+      const activeSub = subRes.rows[0];
+      if (!activeSub.expires_at || new Date(activeSub.expires_at) > new Date()) {
+        hasValidSub = true;
+      }
+    }
+
+    if (!hasValidSub) {
+      return res.status(402).json({
+        error: 'payment_required',
+        message: '🔒 Payment Required: An active subscription is required to create a business profile. Please choose a plan and complete payment.'
+      });
+    }
+
     const cleanName = (name || '').trim().replace(/['";<>\\]/g, '').substring(0, 100);
     const cleanCategory = (category || '').trim().replace(/['";<>\\]/g, '').substring(0, 80);
     const cleanTone = (tone_default || '').trim() || 'friendly';

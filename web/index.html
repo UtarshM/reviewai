@@ -786,8 +786,15 @@
             const couponStatus = document.getElementById('coupon-status');
 
             if (subModal) {
-              if (openSubBtn) openSubBtn.onclick = () => subModal.classList.remove('hidden');
-              if (openSubSideBtn) openSubSideBtn.onclick = () => subModal.classList.remove('hidden');
+              const triggerSubModal = () => {
+                subModal.classList.remove('hidden');
+                if (couponInput && !couponInput.value) {
+                  couponInput.value = 'SCA99';
+                }
+                if (applyCouponBtn) applyCouponBtn.click();
+              };
+              if (openSubBtn) openSubBtn.onclick = triggerSubModal;
+              if (openSubSideBtn) openSubSideBtn.onclick = triggerSubModal;
               if (closeSubBtn) closeSubBtn.onclick = () => subModal.classList.add('hidden');
             }
 
@@ -1011,7 +1018,18 @@
                   } else if (res.status === 402) {
                     addModal.classList.add('hidden');
                     const subModal = document.getElementById('sub-modal');
-                    if (subModal) subModal.classList.remove('hidden');
+                    const errDiv = document.getElementById('sub-error');
+                    if (errDiv) {
+                      errDiv.innerText = '🔒 Payment Required: An active subscription is required to create a business profile. Please choose a plan below.';
+                      errDiv.classList.remove('hidden');
+                    }
+                    if (subModal) {
+                      subModal.classList.remove('hidden');
+                      const couponInput = document.getElementById('sub-coupon-input');
+                      const applyCouponBtn = document.getElementById('apply-coupon-btn');
+                      if (couponInput && !couponInput.value) couponInput.value = 'SCA99';
+                      if (applyCouponBtn) applyCouponBtn.click();
+                    }
                   }
                 } catch (err) { console.error(err); }
               };
