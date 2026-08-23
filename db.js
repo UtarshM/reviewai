@@ -354,6 +354,62 @@ async function runJsQuery(text, params = []) {
       }
       return { rows: [] };
     }
+
+    // 15. pending_accounts handlers
+    if (lowerSql.includes('insert into pending_accounts')) {
+      const [email, phone, password, business_name, plan, amount, order_id, coupon_code, status] = params;
+      const newAcc = {
+        id: storeMemory.pending_id_seq++,
+        email: (email || '').trim().toLowerCase(),
+        phone: (phone || '').trim(),
+        password: password || '',
+        business_name: business_name || '',
+        plan: plan || '1_month',
+        amount: Number(amount || 0),
+        order_id,
+        payment_id: null,
+        signature: null,
+        coupon_code: coupon_code || null,
+        status: status || 'paid_pending_manual_approval',
+        created_at: new Date().toISOString()
+      };
+      if (!storeMemory.pending_accounts) storeMemory.pending_accounts = [];
+      storeMemory.pending_accounts.push(newAcc);
+      saveStore(storeMemory);
+      return { rows: [newAcc] };
+    }
+
+    if (lowerSql.includes('from pending_accounts')) {
+      if (!storeMemory.pending_accounts) storeMemory.pending_accounts = [];
+      let list = [...storeMemory.pending_accounts];
+      if (lowerSql.includes('email =')) {
+        const email = (params[0] || '').trim().toLowerCase();
+        list = list.filter(p => p.email.toLowerCase() === email);
+      }
+      if (lowerSql.includes('order_id =')) {
+        const orderId = params[0];
+        list = list.filter(p => p.order_id === orderId);
+      }
+      if (lowerSql.includes('status =')) {
+        const st = params[0];
+        list = list.filter(p => p.status === st);
+      }
+      return { rows: list };
+    }
+
+    if (lowerSql.includes('update pending_accounts')) {
+      if (!storeMemory.pending_accounts) storeMemory.pending_accounts = [];
+      const [payment_id, signature, status, order_id] = params;
+      const item = storeMemory.pending_accounts.find(p => p.order_id === order_id);
+      if (item) {
+        item.payment_id = payment_id;
+        item.signature = signature;
+        item.status = status;
+        saveStore(storeMemory);
+        return { rows: [item] };
+      }
+      return { rows: [] };
+    }
   } catch (err) {
     if (err.code === '23505') throw err;
     console.error('JS Store query execution error:', err);
@@ -373,6 +429,23 @@ async function checkPg() {
   }
   try {
     const client = await pool.connect();
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS pending_accounts (
+        id SERIAL PRIMARY KEY,
+        email VARCHAR(255) NOT NULL,
+        phone VARCHAR(50) NOT NULL,
+        password TEXT NOT NULL,
+        business_name VARCHAR(255) DEFAULT '',
+        plan TEXT NOT NULL,
+        amount INTEGER NOT NULL,
+        order_id TEXT UNIQUE NOT NULL,
+        payment_id TEXT,
+        signature TEXT,
+        coupon_code TEXT,
+        status VARCHAR(50) DEFAULT 'paid_pending_manual_approval',
+        created_at TIMESTAMPTZ DEFAULT NOW()
+      );
+    `);
     client.release();
     usePostgres = true;
   } catch (err) {

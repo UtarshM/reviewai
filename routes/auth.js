@@ -66,6 +66,14 @@ router.post('/login', async (req, res) => {
     // Fetch user
     const result = await query('SELECT id, email, password_hash FROM users WHERE email = $1', [cleanEmail]);
     if (!result.rows || result.rows.length === 0) {
+      // Check if user paid and is waiting for manual account approval
+      const pendCheck = await query("SELECT * FROM pending_accounts WHERE LOWER(email) = $1 AND status = 'paid_pending_manual_approval'", [cleanEmail]);
+      if (pendCheck.rows && pendCheck.rows.length > 0) {
+        return res.status(403).json({
+          error: 'pending_manual_approval',
+          message: '🔒 Payment Verified & Received! Your account is currently being set up manually by our team. Your verified Login ID & Password will be sent to your email & phone number shortly.'
+        });
+      }
       return res.status(401).json({ error: 'unauthorized', message: 'Invalid email or password' });
     }
 

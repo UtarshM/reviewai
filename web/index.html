@@ -161,6 +161,132 @@
       </div>
     </div>
 
+    <!-- Public Pre-Payment Checkout & Contact Details Modal (White Theme) -->
+    <div id="pub-checkout-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4">
+      <div class="bg-white rounded-3xl p-6 md:p-8 max-w-xl w-full shadow-2xl space-y-5 text-left border border-slate-200 max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between">
+          <div>
+            <span class="text-[10px] font-extrabold text-amber-700 bg-amber-50 px-3 py-1 rounded-full uppercase border border-amber-200 tracking-wider">Step 1 of 2 • Checkout & Setup</span>
+            <h3 class="text-2xl font-extrabold text-slate-900 font-heading mt-1">Select Plan & Account Info</h3>
+          </div>
+          <button id="close-pub-checkout-btn" class="text-slate-600 hover:text-slate-900 text-sm font-bold bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-xl border border-slate-300 transition">✕ Close</button>
+        </div>
+
+        <form id="pub-checkout-form" class="space-y-4">
+          <!-- Contact Details Grid -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Email Address *</label>
+              <input type="email" id="pub-email" required placeholder="owner@business.com" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-amber-500 focus:bg-white transition font-medium" />
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Phone / WhatsApp *</label>
+              <input type="tel" id="pub-phone" required placeholder="+91 98765 43210" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-amber-500 focus:bg-white transition font-medium" />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Business Name *</label>
+              <input type="text" id="pub-biz-name" required placeholder="e.g. Pizza Studio" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-amber-500 focus:bg-white transition font-medium" />
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Desired Password *</label>
+              <input type="password" id="pub-pass" required placeholder="••••••••" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-amber-500 focus:bg-white transition font-medium" />
+            </div>
+          </div>
+
+          <!-- Coupon Bar -->
+          <div class="bg-amber-50/80 border border-amber-200 rounded-2xl p-3 flex items-center justify-between gap-2">
+            <div class="text-xs font-bold text-amber-900">
+              🏷️ Coupon Code:
+            </div>
+            <div class="flex items-center gap-2">
+              <input type="text" id="pub-coupon-input" placeholder="e.g. SCA99" value="SCA99" class="uppercase bg-white border border-amber-300 rounded-xl px-3 py-1.5 text-xs text-slate-900 font-mono font-bold w-28 text-center" />
+              <button id="pub-apply-coupon-btn" type="button" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-1.5 rounded-xl text-xs transition">Apply</button>
+            </div>
+          </div>
+          <div id="pub-coupon-status" class="text-xs font-bold p-2 rounded-xl text-center bg-emerald-50 border border-emerald-200 text-emerald-800">🎉 Coupon SCA99 Active (99% OFF Applied!)</div>
+
+          <!-- Select Plan Selection Options -->
+          <div>
+            <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-2">Select Subscription Plan *</label>
+            <div class="grid grid-cols-3 gap-2">
+              <label class="border-2 border-slate-200 has-[:checked]:border-amber-500 rounded-2xl p-3 text-center cursor-pointer bg-slate-50 has-[:checked]:bg-amber-50/50 transition">
+                <input type="radio" name="pub-plan" value="1_month" class="sr-only" />
+                <div class="text-[10px] font-bold text-amber-700 uppercase">Monthly</div>
+                <div class="text-sm font-extrabold text-slate-900 font-heading mt-0.5" id="pub-price-1">₹10</div>
+                <div class="text-[9px] text-slate-500">1 Month</div>
+              </label>
+
+              <label class="border-2 border-amber-400 has-[:checked]:border-amber-500 rounded-2xl p-3 text-center cursor-pointer bg-amber-50/40 has-[:checked]:bg-amber-100/50 transition relative">
+                <span class="absolute -top-2 left-1/2 -translate-x-1/2 bg-amber-500 text-slate-950 text-[8px] font-extrabold px-1.5 py-0.2 rounded-full">POPULAR</span>
+                <input type="radio" name="pub-plan" value="6_months" checked class="sr-only" />
+                <div class="text-[10px] font-bold text-amber-800 uppercase mt-1">6 Months</div>
+                <div class="text-sm font-extrabold text-slate-900 font-heading mt-0.5" id="pub-price-6">₹40</div>
+                <div class="text-[9px] text-emerald-700 font-bold">Save ₹2,000</div>
+              </label>
+
+              <label class="border-2 border-slate-200 has-[:checked]:border-amber-500 rounded-2xl p-3 text-center cursor-pointer bg-slate-50 has-[:checked]:bg-amber-50/50 transition">
+                <input type="radio" name="pub-plan" value="12_months" class="sr-only" />
+                <div class="text-[10px] font-bold text-amber-700 uppercase">Annual</div>
+                <div class="text-sm font-extrabold text-amber-600 font-heading mt-0.5" id="pub-price-12">₹50</div>
+                <div class="text-[9px] text-emerald-700 font-bold">Best Value</div>
+              </label>
+            </div>
+          </div>
+
+          <div id="pub-error" class="hidden bg-rose-50 border border-rose-200 text-rose-700 p-3 rounded-2xl text-xs font-medium"></div>
+
+          <button type="submit" id="pub-submit-btn" class="w-full bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:brightness-105 text-slate-950 font-extrabold py-3.5 rounded-xl text-sm transition shadow-lg shadow-amber-500/20">Proceed to Razorpay Payment →</button>
+        </form>
+
+        <div class="text-center text-[10px] text-slate-500 font-medium border-t border-slate-200 pt-3">
+          🔒 Payments secured by Razorpay Gateway with 256-Bit SSL Encryption.
+        </div>
+      </div>
+    </div>
+
+    <!-- Public Payment Success & Manual Credential Notice Modal -->
+    <div id="pub-success-modal" class="hidden fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-md flex items-center justify-center p-4">
+      <div class="bg-white rounded-3xl p-6 md:p-8 max-w-lg w-full shadow-2xl space-y-5 text-center border border-slate-200">
+        <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-3xl mx-auto font-bold animate-bounce">✓</div>
+        
+        <h3 class="text-2xl font-extrabold text-slate-900 font-heading">Payment Received Successfully! 🎉</h3>
+        <p class="text-xs text-slate-600">Your transaction has been verified. Our team is now manually generating your Login ID & Password.</p>
+        
+        <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-left space-y-2 text-xs text-slate-800 font-medium">
+          <div class="flex justify-between border-b border-slate-200 pb-2">
+            <span class="text-slate-500">Payment ID:</span>
+            <span id="succ-pay-id" class="font-mono font-bold text-slate-900">pay_xxx</span>
+          </div>
+          <div class="flex justify-between border-b border-slate-200 pb-2">
+            <span class="text-slate-500">Email ID:</span>
+            <span id="succ-email" class="font-bold text-slate-900">owner@biz.com</span>
+          </div>
+          <div class="flex justify-between border-b border-slate-200 pb-2">
+            <span class="text-slate-500">Phone Number:</span>
+            <span id="succ-phone" class="font-bold text-slate-900">+91 98765 43210</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-500">Plan Selected:</span>
+            <span id="succ-plan" class="font-bold text-amber-600">6 Months Access</span>
+          </div>
+        </div>
+
+        <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-left space-y-2">
+          <div class="text-xs font-bold text-amber-900 flex items-center gap-1.5">
+            <span>⏱️ Manual Credential Delivery Status:</span>
+          </div>
+          <p class="text-[11px] text-amber-800 leading-relaxed">
+            Our team will manually issue and deliver your verified <strong>Login ID & Password</strong> directly to your Email (<span id="succ-email-2" class="font-bold"></span>) and Phone/WhatsApp (<span id="succ-phone-2" class="font-bold"></span>) within <strong>15 to 30 minutes</strong>.
+          </p>
+        </div>
+
+        <button id="close-succ-btn" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3.5 rounded-xl text-xs transition shadow-md">Done / Close</button>
+      </div>
+    </div>
+
     <script>
       (function() {
         const path = window.location.pathname;
@@ -1017,7 +1143,139 @@
             html += '<p class="text-[10px] leading-relaxed text-slate-500 max-w-3xl mx-auto">Disclaimer: AI generated review responses are provided as recommendations. Business owners must review content before publishing on Google Business Profiles or third-party review platforms. Payments are processed via Razorpay payment gateway with 256-bit SSL encryption.</p>';
             html += '</div></footer></div>';
 
-            app.innerHTML = html;
+            // Wire-up Plan Selection & Get Started Buttons to open #pub-checkout-modal
+            const pubModal = document.getElementById('pub-checkout-modal');
+            const pubCloseBtn = document.getElementById('close-pub-checkout-btn');
+            const pubSuccModal = document.getElementById('pub-success-modal');
+            const closeSuccBtn = document.getElementById('close-succ-btn');
+
+            if (pubCloseBtn && pubModal) {
+              pubCloseBtn.onclick = () => pubModal.classList.add('hidden');
+            }
+            if (closeSuccBtn && pubSuccModal) {
+              closeSuccBtn.onclick = () => pubSuccModal.classList.add('hidden');
+            }
+
+            // Open Checkout Modal from Pricing Plan Buttons / Hero CTA
+            document.querySelectorAll('a[href="#pricing"], a[href="#auth"]').forEach(btn => {
+              btn.onclick = function(e) {
+                if (this.innerText.includes('Select') || this.innerText.includes('Get Started') || this.innerText.includes('Free Trial')) {
+                  e.preventDefault();
+                  if (pubModal) pubModal.classList.remove('hidden');
+                }
+              };
+            });
+
+            // Public Coupon Apply Handler
+            const pubApplyBtn = document.getElementById('pub-apply-coupon-btn');
+            const pubCouponInput = document.getElementById('pub-coupon-input');
+            const pubCouponStatus = document.getElementById('pub-coupon-status');
+
+            if (pubApplyBtn && pubCouponInput && pubCouponStatus) {
+              pubApplyBtn.onclick = () => {
+                const code = pubCouponInput.value.trim().toUpperCase();
+                if (code === 'SCA99') {
+                  pubCouponStatus.className = 'text-xs font-bold p-2 rounded-xl text-center bg-emerald-50 border border-emerald-200 text-emerald-800 block';
+                  pubCouponStatus.innerText = '🎉 Coupon SCA99 Active (99% OFF Applied!)';
+                  document.getElementById('pub-price-1').innerText = '₹10';
+                  document.getElementById('pub-price-6').innerText = '₹40';
+                  document.getElementById('pub-price-12').innerText = '₹50';
+                } else if (code) {
+                  pubCouponStatus.className = 'text-xs font-bold p-2 rounded-xl text-center bg-rose-50 border border-rose-200 text-rose-700 block';
+                  pubCouponStatus.innerText = '❌ Invalid coupon. Enter "SCA99" for 99% off.';
+                  document.getElementById('pub-price-1').innerText = '₹1,000';
+                  document.getElementById('pub-price-6').innerText = '₹4,000';
+                  document.getElementById('pub-price-12').innerText = '₹5,000';
+                } else {
+                  pubCouponStatus.className = 'hidden';
+                }
+              };
+            }
+
+            // Public Pre-Payment Form Submit
+            const pubForm = document.getElementById('pub-checkout-form');
+            if (pubForm) {
+              pubForm.onsubmit = async function(e) {
+                e.preventDefault();
+                const email = document.getElementById('pub-email').value;
+                const phone = document.getElementById('pub-phone').value;
+                const bizName = document.getElementById('pub-biz-name').value;
+                const password = document.getElementById('pub-pass').value;
+                const couponCode = document.getElementById('pub-coupon-input').value;
+                const plan = document.querySelector('input[name="pub-plan"]:checked')?.value || '6_months';
+                const errDiv = document.getElementById('pub-error');
+                const submitBtn = document.getElementById('pub-submit-btn');
+
+                if (errDiv) errDiv.classList.add('hidden');
+                submitBtn.innerText = 'Creating Secure Payment Order...';
+
+                try {
+                  const res = await fetch('/api/v1/payments/create-public-order', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, phone, business_name: bizName, password, plan, coupon_code: couponCode })
+                  });
+
+                  const orderData = await res.json();
+                  if (!res.ok) throw new Error(orderData.message || 'Payment order creation failed');
+
+                  // Handle Razorpay Checkout or Demo Verification
+                  if (window.Razorpay && orderData.key_id !== 'rzp_test_dummy_key_id') {
+                    const rzp = new window.Razorpay({
+                      key: orderData.key_id,
+                      amount: orderData.amount,
+                      currency: orderData.currency,
+                      name: 'Strs Inc',
+                      description: orderData.plan_name,
+                      order_id: orderData.order_id,
+                      prefill: { email: email, contact: phone },
+                      handler: async function (response) {
+                        await verifyPublicPayment(response.razorpay_order_id, response.razorpay_payment_id, response.razorpay_signature, email, phone, password, bizName, plan);
+                      }
+                    });
+                    rzp.open();
+                  } else {
+                    await verifyPublicPayment(orderData.order_id, 'pay_pub_demo_' + Date.now(), 'demo_sig', email, phone, password, bizName, plan);
+                  }
+                } catch (err) {
+                  if (errDiv) {
+                    errDiv.innerText = '❌ ' + (err.message || 'Payment failed. Please try again.');
+                    errDiv.classList.remove('hidden');
+                  }
+                }
+                submitBtn.innerText = 'Proceed to Razorpay Payment →';
+              };
+            }
+
+            async function verifyPublicPayment(orderId, payId, sig, email, phone, pass, biz, plan) {
+              try {
+                const res = await fetch('/api/v1/payments/verify-public-payment', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    razorpay_order_id: orderId,
+                    razorpay_payment_id: payId,
+                    razorpay_signature: sig,
+                    email, phone, password: pass, business_name: biz, plan
+                  })
+                });
+
+                if (res.ok) {
+                  const data = await res.json();
+                  if (pubModal) pubModal.classList.add('hidden');
+
+                  // Fill success modal
+                  document.getElementById('succ-pay-id').innerText = data.payment_id;
+                  document.getElementById('succ-email').innerText = data.email;
+                  document.getElementById('succ-phone').innerText = data.phone;
+                  document.getElementById('succ-plan').innerText = data.plan_name;
+                  document.getElementById('succ-email-2').innerText = data.email;
+                  document.getElementById('succ-phone-2').innerText = data.phone;
+
+                  if (pubSuccModal) pubSuccModal.classList.remove('hidden');
+                }
+              } catch (e) { console.error(e); }
+            }
 
             // Bind Auth Form Submission
             document.getElementById('auth-form').onsubmit = async function(e) {
@@ -1032,20 +1290,14 @@
                   body: JSON.stringify({ email, password })
                 });
 
-                if (!res.ok) {
-                  res = await fetch('/api/v1/auth/register', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
-                  });
-                }
-
-                if (res.ok) {
-                  const data = await res.json();
+                const data = await res.json();
+                if (res.status === 403) {
+                  alert(data.message || 'Payment verified! Credentials are being created manually.');
+                } else if (res.ok) {
                   localStorage.setItem('replydesk_token', data.token);
                   initMerchantDashboard();
                 } else {
-                  alert('Authentication failed.');
+                  alert(data.message || 'Authentication failed.');
                 }
               } catch (err) { console.error(err); }
             };

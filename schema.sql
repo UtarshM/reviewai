@@ -73,6 +73,22 @@ CREATE TABLE IF NOT EXISTS payments (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS pending_accounts (
+  id SERIAL PRIMARY KEY,
+  email VARCHAR(255) NOT NULL,
+  phone VARCHAR(50) NOT NULL,
+  password TEXT NOT NULL,
+  business_name VARCHAR(255) DEFAULT '',
+  plan TEXT NOT NULL,
+  amount INTEGER NOT NULL,
+  order_id TEXT UNIQUE NOT NULL,
+  payment_id TEXT,
+  signature TEXT,
+  coupon_code TEXT,
+  status VARCHAR(50) DEFAULT 'paid_pending_manual_approval',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 CREATE TABLE IF NOT EXISTS google_posts (
   id SERIAL PRIMARY KEY,
   business_id INTEGER REFERENCES businesses(id) ON DELETE CASCADE,
