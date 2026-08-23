@@ -225,11 +225,11 @@ router.post('/business/:businessId/ai-assistant', authMiddleware, async (req, re
     const bizRes = await query('SELECT * FROM businesses WHERE id = $1', [Number(businessId)]);
     const biz = bizRes.rows[0] || { name: 'Local Business', category: 'General' };
 
-    const prompt = `You are RevmeAI Chief-of-Staff, an elite AI reputation and growth advisor for local business owner of ${biz.name} (${biz.category}).
+    const prompt = `You are Strs Inc Chief-of-Staff, an elite AI reputation and growth advisor for local business owner of ${biz.name} (${biz.category}).
 Respond concisely to the business owner's question: "${message || 'How is my business reputation doing?'}".
 Give strategic, outcome-driven advice on getting reviews, improving local SEO, and managing customer feedback.`;
 
-    let reply = `Here is your RevmeAI Executive Summary for ${biz.name}: Your rating is healthy at 4.8★ with 94% review response rate. Continue sending QR review requests after each customer visit!`;
+    let reply = `Here is your Strs Inc Executive Summary for ${biz.name}: Your rating is healthy at 4.8★ with 94% review response rate. Continue sending QR review requests after each customer visit!`;
 
     if (GROQ_API_KEY) {
       try {
