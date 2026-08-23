@@ -133,10 +133,9 @@
         <div class="bg-amber-50/80 border border-amber-200 rounded-2xl p-3.5 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div class="flex items-center gap-2 text-xs font-bold text-amber-900">
             <span>🏷️ Have a Coupon Code?</span>
-            <span class="text-[11px] font-normal text-amber-700">(Use <code class="font-mono font-bold bg-amber-100 px-1.5 py-0.5 rounded text-amber-900">SCA99</code> for 99% OFF)</span>
           </div>
           <div class="flex items-center gap-2 w-full sm:w-auto">
-            <input type="text" id="sub-coupon-input" placeholder="e.g. SCA99" class="uppercase bg-white border border-amber-300 rounded-xl px-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-amber-500 w-full sm:w-36 font-mono font-bold" />
+            <input type="text" id="sub-coupon-input" placeholder="Enter Coupon Code" class="uppercase bg-white border border-amber-300 rounded-xl px-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-amber-500 w-full sm:w-36 font-mono font-bold" />
             <button id="apply-coupon-btn" type="button" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-4 py-1.5 rounded-xl text-xs transition shrink-0">Apply</button>
           </div>
         </div>
@@ -238,14 +237,14 @@
           <!-- Coupon Bar -->
           <div class="bg-amber-50/80 border border-amber-200 rounded-2xl p-3 flex items-center justify-between gap-2">
             <div class="text-xs font-bold text-amber-900">
-              🏷️ Coupon Code:
+              🏷️ Have a Coupon Code?
             </div>
             <div class="flex items-center gap-2">
-              <input type="text" id="pub-coupon-input" placeholder="e.g. SCA99" value="SCA99" class="uppercase bg-white border border-amber-300 rounded-xl px-3 py-1.5 text-xs text-slate-900 font-mono font-bold w-28 text-center" />
-              <button id="pub-apply-coupon-btn" type="button" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-1.5 rounded-xl text-xs transition">Apply</button>
+              <input type="text" id="pub-coupon-input" placeholder="Enter Coupon Code" value="" class="uppercase bg-white border border-amber-300 rounded-xl px-3 py-1.5 text-xs text-slate-900 font-mono font-bold w-36 text-center focus:outline-none focus:border-amber-500" />
+              <button id="pub-apply-coupon-btn" type="button" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3.5 py-1.5 rounded-xl text-xs transition">Apply</button>
             </div>
           </div>
-          <div id="pub-coupon-status" class="text-xs font-bold p-2 rounded-xl text-center bg-emerald-50 border border-emerald-200 text-emerald-800">🎉 Coupon SCA99 Active (99% OFF Applied!)</div>
+          <div id="pub-coupon-status" class="hidden text-xs font-bold p-2 rounded-xl text-center"></div>
 
           <!-- Select Plan Selection Options -->
           <div>
@@ -254,7 +253,7 @@
               <label class="border-2 border-slate-200 has-[:checked]:border-amber-500 rounded-2xl p-3 text-center cursor-pointer bg-slate-50 has-[:checked]:bg-amber-50/50 transition">
                 <input type="radio" name="pub-plan" value="1_month" class="sr-only" />
                 <div class="text-[10px] font-bold text-amber-700 uppercase">Monthly</div>
-                <div class="text-sm font-extrabold text-slate-900 font-heading mt-0.5" id="pub-price-1">₹10</div>
+                <div class="text-sm font-extrabold text-slate-900 font-heading mt-0.5" id="pub-price-1">₹1,000</div>
                 <div class="text-[9px] text-slate-500">1 Month</div>
               </label>
 
@@ -262,14 +261,14 @@
                 <span class="absolute -top-2 left-1/2 -translate-x-1/2 bg-amber-500 text-slate-950 text-[8px] font-extrabold px-1.5 py-0.2 rounded-full">POPULAR</span>
                 <input type="radio" name="pub-plan" value="6_months" checked class="sr-only" />
                 <div class="text-[10px] font-bold text-amber-800 uppercase mt-1">6 Months</div>
-                <div class="text-sm font-extrabold text-slate-900 font-heading mt-0.5" id="pub-price-6">₹40</div>
+                <div class="text-sm font-extrabold text-slate-900 font-heading mt-0.5" id="pub-price-6">₹4,000</div>
                 <div class="text-[9px] text-emerald-700 font-bold">Save ₹2,000</div>
               </label>
 
               <label class="border-2 border-slate-200 has-[:checked]:border-amber-500 rounded-2xl p-3 text-center cursor-pointer bg-slate-50 has-[:checked]:bg-amber-50/50 transition">
                 <input type="radio" name="pub-plan" value="12_months" class="sr-only" />
                 <div class="text-[10px] font-bold text-amber-700 uppercase">Annual</div>
-                <div class="text-sm font-extrabold text-amber-600 font-heading mt-0.5" id="pub-price-12">₹50</div>
+                <div class="text-sm font-extrabold text-amber-600 font-heading mt-0.5" id="pub-price-12">₹5,000</div>
                 <div class="text-[9px] text-emerald-700 font-bold">Best Value</div>
               </label>
             </div>
@@ -786,15 +785,8 @@
             const couponStatus = document.getElementById('coupon-status');
 
             if (subModal) {
-              const triggerSubModal = () => {
-                subModal.classList.remove('hidden');
-                if (couponInput && !couponInput.value) {
-                  couponInput.value = 'SCA99';
-                }
-                if (applyCouponBtn) applyCouponBtn.click();
-              };
-              if (openSubBtn) openSubBtn.onclick = triggerSubModal;
-              if (openSubSideBtn) openSubSideBtn.onclick = triggerSubModal;
+              if (openSubBtn) openSubBtn.onclick = () => subModal.classList.remove('hidden');
+              if (openSubSideBtn) openSubSideBtn.onclick = () => subModal.classList.remove('hidden');
               if (closeSubBtn) closeSubBtn.onclick = () => subModal.classList.add('hidden');
             }
 
@@ -813,7 +805,7 @@
                   if (btn12) btn12.innerText = 'Pay ₹50 (99% OFF)';
                 } else if (code) {
                   couponStatus.className = 'bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium p-2.5 rounded-xl text-center block';
-                  couponStatus.innerText = '❌ Invalid coupon code. Enter "SCA99" for 99% off.';
+                  couponStatus.innerText = '❌ Invalid coupon code. Please check and try again.';
                 } else {
                   couponStatus.className = 'hidden';
                 }
@@ -1023,13 +1015,7 @@
                       errDiv.innerText = '🔒 Payment Required: An active subscription is required to create a business profile. Please choose a plan below.';
                       errDiv.classList.remove('hidden');
                     }
-                    if (subModal) {
-                      subModal.classList.remove('hidden');
-                      const couponInput = document.getElementById('sub-coupon-input');
-                      const applyCouponBtn = document.getElementById('apply-coupon-btn');
-                      if (couponInput && !couponInput.value) couponInput.value = 'SCA99';
-                      if (applyCouponBtn) applyCouponBtn.click();
-                    }
+                    if (subModal) subModal.classList.remove('hidden');
                   }
                 } catch (err) { console.error(err); }
               };
@@ -1308,7 +1294,7 @@
                   if (p12) p12.innerText = '₹50';
                 } else if (code) {
                   pubCouponStatus.className = 'text-xs font-bold p-2 rounded-xl text-center bg-rose-50 border border-rose-200 text-rose-700 block';
-                  pubCouponStatus.innerText = '❌ Invalid coupon. Enter "SCA99" for 99% off.';
+                  pubCouponStatus.innerText = '❌ Invalid coupon code. Please check and try again.';
                   if (p1) p1.innerText = '₹1,000';
                   if (p6) p6.innerText = '₹4,000';
                   if (p12) p12.innerText = '₹5,000';

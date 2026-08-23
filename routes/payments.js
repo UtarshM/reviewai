@@ -296,7 +296,7 @@ router.post('/create-order', async (req, res) => {
       } else {
         return res.status(400).json({
           error: 'invalid_coupon',
-          message: 'Invalid coupon code. Use "SCA99" for 99% off discount.'
+          message: 'Invalid coupon code. Please check and try again.'
         });
       }
     }
