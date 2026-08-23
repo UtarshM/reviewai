@@ -1143,6 +1143,9 @@
             html += '<p class="text-[10px] leading-relaxed text-slate-500 max-w-3xl mx-auto">Disclaimer: AI generated review responses are provided as recommendations. Business owners must review content before publishing on Google Business Profiles or third-party review platforms. Payments are processed via Razorpay payment gateway with 256-bit SSL encryption.</p>';
             html += '</div></footer></div>';
 
+            // Set app HTML
+            app.innerHTML = html;
+
             // Wire-up Plan Selection & Get Started Buttons to open #pub-checkout-modal
             const pubModal = document.getElementById('pub-checkout-modal');
             const pubCloseBtn = document.getElementById('close-pub-checkout-btn');
@@ -1278,8 +1281,10 @@
             }
 
             // Bind Auth Form Submission
-            document.getElementById('auth-form').onsubmit = async function(e) {
-              e.preventDefault();
+            const authForm = document.getElementById('auth-form');
+            if (authForm) {
+              authForm.onsubmit = async function(e) {
+                e.preventDefault();
               const email = document.getElementById('auth-email').value;
               const password = document.getElementById('auth-pass').value;
 
