@@ -90,6 +90,19 @@
         <div id="sub-error" class="hidden bg-rose-50 border border-rose-200 text-rose-700 p-3 rounded-2xl text-xs font-medium"></div>
         <div id="sub-success" class="hidden bg-emerald-50 border border-emerald-200 text-emerald-800 p-3 rounded-2xl text-xs font-bold text-center"></div>
 
+        <!-- Coupon Code Bar -->
+        <div class="bg-amber-50/80 border border-amber-200 rounded-2xl p-3.5 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div class="flex items-center gap-2 text-xs font-bold text-amber-900">
+            <span>🏷️ Have a Coupon Code?</span>
+            <span class="text-[11px] font-normal text-amber-700">(Use <code class="font-mono font-bold bg-amber-100 px-1.5 py-0.5 rounded text-amber-900">SCA99</code> for 99% OFF)</span>
+          </div>
+          <div class="flex items-center gap-2 w-full sm:w-auto">
+            <input type="text" id="sub-coupon-input" placeholder="e.g. SCA99" class="uppercase bg-white border border-amber-300 rounded-xl px-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-amber-500 w-full sm:w-36 font-mono font-bold" />
+            <button id="apply-coupon-btn" type="button" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-4 py-1.5 rounded-xl text-xs transition shrink-0">Apply</button>
+          </div>
+        </div>
+        <div id="coupon-status" class="hidden text-xs font-bold p-2.5 rounded-xl text-center"></div>
+
         <!-- 3 Plans Grid -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
           <!-- 1 Month Plan -->
@@ -540,6 +553,9 @@
             const openSubBtn = document.getElementById('open-sub-modal-btn');
             const openSubSideBtn = document.getElementById('open-sub-modal-side-btn');
             const closeSubBtn = document.getElementById('close-sub-modal-btn');
+            const applyCouponBtn = document.getElementById('apply-coupon-btn');
+            const couponInput = document.getElementById('sub-coupon-input');
+            const couponStatus = document.getElementById('coupon-status');
 
             if (subModal) {
               if (openSubBtn) openSubBtn.onclick = () => subModal.classList.remove('hidden');
@@ -547,10 +563,33 @@
               if (closeSubBtn) closeSubBtn.onclick = () => subModal.classList.add('hidden');
             }
 
+            if (applyCouponBtn && couponInput && couponStatus) {
+              applyCouponBtn.onclick = () => {
+                const code = couponInput.value.trim().toUpperCase();
+                if (code === 'SCA99') {
+                  couponStatus.className = 'bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold p-2.5 rounded-xl text-center block';
+                  couponStatus.innerText = '🎉 Coupon SCA99 Applied! 99% Discount Active (Pay ₹10 / ₹40 / ₹50)';
+                  
+                  const btn1 = document.querySelector('[data-plan="1_month"]');
+                  const btn6 = document.querySelector('[data-plan="6_months"]');
+                  const btn12 = document.querySelector('[data-plan="12_months"]');
+                  if (btn1) btn1.innerText = 'Pay ₹10 (99% OFF)';
+                  if (btn6) btn6.innerText = 'Pay ₹40 (99% OFF)';
+                  if (btn12) btn12.innerText = 'Pay ₹50 (99% OFF)';
+                } else if (code) {
+                  couponStatus.className = 'bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium p-2.5 rounded-xl text-center block';
+                  couponStatus.innerText = '❌ Invalid coupon code. Enter "SCA99" for 99% off.';
+                } else {
+                  couponStatus.className = 'hidden';
+                }
+              };
+            }
+
             // Payment Plan Action Buttons
             document.querySelectorAll('.pay-plan-btn').forEach(btn => {
               btn.onclick = async function() {
                 const planKey = this.getAttribute('data-plan');
+                const couponCode = (document.getElementById('sub-coupon-input')?.value || '').trim();
                 const errDiv = document.getElementById('sub-error');
                 const succDiv = document.getElementById('sub-success');
                 if (errDiv) errDiv.classList.add('hidden');
@@ -561,7 +600,7 @@
                   const res = await fetch('/api/v1/payments/create-order', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                    body: JSON.stringify({ plan: planKey })
+                    body: JSON.stringify({ plan: planKey, coupon_code: couponCode })
                   });
                   const orderData = await res.json();
                   if (!res.ok) throw new Error(orderData.message || 'Payment failed');

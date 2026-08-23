@@ -81,7 +81,7 @@ router.get('/status', async (req, res) => {
 router.post('/create-order', async (req, res) => {
   try {
     const userId = req.userId;
-    const { plan } = req.body;
+    const { plan, coupon_code } = req.body;
 
     const selectedPlan = PLANS[plan];
     if (!selectedPlan) {
@@ -91,14 +91,31 @@ router.post('/create-order', async (req, res) => {
       });
     }
 
+    let finalAmount = selectedPlan.amount;
+    let discountApplied = false;
+
+    if (coupon_code) {
+      const code = String(coupon_code).trim().toUpperCase();
+      if (code === 'SCA99') {
+        discountApplied = true;
+        // 99% OFF (Pay 1%, min 100 paise = ₹1)
+        finalAmount = Math.max(100, Math.round(selectedPlan.amount * 0.01));
+      } else {
+        return res.status(400).json({
+          error: 'invalid_coupon',
+          message: 'Invalid coupon code. Use "SCA99" for 99% off discount.'
+        });
+      }
+    }
+
     let orderId = `order_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
 
     if (razorpayInstance) {
       const options = {
-        amount: selectedPlan.amount,
+        amount: finalAmount,
         currency: 'INR',
         receipt: `rcpt_${userId}_${Date.now()}`,
-        notes: { user_id: userId, plan: plan }
+        notes: { user_id: userId, plan: plan, coupon: coupon_code || '' }
       };
       const order = await razorpayInstance.orders.create(options);
       orderId = order.id;
@@ -107,16 +124,18 @@ router.post('/create-order', async (req, res) => {
     // Save order in payments log table
     await query(
       'INSERT INTO payments (user_id, order_id, amount, plan, status) VALUES ($1, $2, $3, $4, $5)',
-      [userId, orderId, selectedPlan.amount / 100, plan, 'created']
+      [userId, orderId, finalAmount / 100, plan, 'created']
     );
 
     return res.status(200).json({
       order_id: orderId,
-      amount: selectedPlan.amount,
+      amount: finalAmount,
       currency: 'INR',
       key_id: RAZORPAY_KEY_ID,
       plan: plan,
-      plan_name: selectedPlan.name
+      plan_name: selectedPlan.name,
+      discount_applied: discountApplied,
+      coupon_code: discountApplied ? 'SCA99' : null
     });
 
   } catch (err) {
