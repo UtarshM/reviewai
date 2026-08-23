@@ -1177,18 +1177,21 @@
             if (pubApplyBtn && pubCouponInput && pubCouponStatus) {
               pubApplyBtn.onclick = () => {
                 const code = pubCouponInput.value.trim().toUpperCase();
+                const p1 = document.getElementById('pub-price-1');
+                const p6 = document.getElementById('pub-price-6');
+                const p12 = document.getElementById('pub-price-12');
                 if (code === 'SCA99') {
                   pubCouponStatus.className = 'text-xs font-bold p-2 rounded-xl text-center bg-emerald-50 border border-emerald-200 text-emerald-800 block';
                   pubCouponStatus.innerText = '🎉 Coupon SCA99 Active (99% OFF Applied!)';
-                  document.getElementById('pub-price-1').innerText = '₹10';
-                  document.getElementById('pub-price-6').innerText = '₹40';
-                  document.getElementById('pub-price-12').innerText = '₹50';
+                  if (p1) p1.innerText = '₹10';
+                  if (p6) p6.innerText = '₹40';
+                  if (p12) p12.innerText = '₹50';
                 } else if (code) {
                   pubCouponStatus.className = 'text-xs font-bold p-2 rounded-xl text-center bg-rose-50 border border-rose-200 text-rose-700 block';
                   pubCouponStatus.innerText = '❌ Invalid coupon. Enter "SCA99" for 99% off.';
-                  document.getElementById('pub-price-1').innerText = '₹1,000';
-                  document.getElementById('pub-price-6').innerText = '₹4,000';
-                  document.getElementById('pub-price-12').innerText = '₹5,000';
+                  if (p1) p1.innerText = '₹1,000';
+                  if (p6) p6.innerText = '₹4,000';
+                  if (p12) p12.innerText = '₹5,000';
                 } else {
                   pubCouponStatus.className = 'hidden';
                 }
@@ -1200,17 +1203,17 @@
             if (pubForm) {
               pubForm.onsubmit = async function(e) {
                 e.preventDefault();
-                const email = document.getElementById('pub-email').value;
-                const phone = document.getElementById('pub-phone').value;
-                const bizName = document.getElementById('pub-biz-name').value;
-                const password = document.getElementById('pub-pass').value;
-                const couponCode = document.getElementById('pub-coupon-input').value;
+                const email = (document.getElementById('pub-email')?.value || '').trim();
+                const phone = (document.getElementById('pub-phone')?.value || '').trim();
+                const bizName = (document.getElementById('pub-biz-name')?.value || '').trim();
+                const password = (document.getElementById('pub-pass')?.value || '').trim();
+                const couponCode = (document.getElementById('pub-coupon-input')?.value || '').trim();
                 const plan = document.querySelector('input[name="pub-plan"]:checked')?.value || '6_months';
                 const errDiv = document.getElementById('pub-error');
                 const submitBtn = document.getElementById('pub-submit-btn');
 
                 if (errDiv) errDiv.classList.add('hidden');
-                submitBtn.innerText = 'Creating Secure Payment Order...';
+                if (submitBtn) submitBtn.innerText = 'Creating Secure Payment Order...';
 
                 try {
                   const res = await fetch('/api/v1/payments/create-public-order', {
@@ -1246,7 +1249,7 @@
                     errDiv.classList.remove('hidden');
                   }
                 }
-                submitBtn.innerText = 'Proceed to Razorpay Payment →';
+                if (submitBtn) submitBtn.innerText = 'Proceed to Razorpay Payment →';
               };
             }
 
@@ -1267,13 +1270,20 @@
                   const data = await res.json();
                   if (pubModal) pubModal.classList.add('hidden');
 
-                  // Fill success modal
-                  document.getElementById('succ-pay-id').innerText = data.payment_id;
-                  document.getElementById('succ-email').innerText = data.email;
-                  document.getElementById('succ-phone').innerText = data.phone;
-                  document.getElementById('succ-plan').innerText = data.plan_name;
-                  document.getElementById('succ-email-2').innerText = data.email;
-                  document.getElementById('succ-phone-2').innerText = data.phone;
+                  // Fill success modal safely
+                  const elPayId = document.getElementById('succ-pay-id');
+                  const elEmail = document.getElementById('succ-email');
+                  const elPhone = document.getElementById('succ-phone');
+                  const elPlan = document.getElementById('succ-plan');
+                  const elEmail2 = document.getElementById('succ-email-2');
+                  const elPhone2 = document.getElementById('succ-phone-2');
+
+                  if (elPayId) elPayId.innerText = data.payment_id;
+                  if (elEmail) elEmail.innerText = data.email;
+                  if (elPhone) elPhone.innerText = data.phone;
+                  if (elPlan) elPlan.innerText = data.plan_name;
+                  if (elEmail2) elEmail2.innerText = data.email;
+                  if (elPhone2) elPhone2.innerText = data.phone;
 
                   if (pubSuccModal) pubSuccModal.classList.remove('hidden');
                 }
