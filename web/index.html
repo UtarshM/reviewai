@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Strs Inc — Local Business Reputation & Digital Operating System</title>
+    <title>Scalezix — Local Business Reputation & Digital Operating System</title>
     
     <!-- Google Fonts & Tailwind CSS -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -117,7 +117,7 @@
         <div class="flex items-center justify-between">
           <div>
             <span class="text-[10px] font-extrabold text-amber-700 bg-amber-50 px-3 py-1 rounded-full uppercase border border-amber-200 tracking-wider">Access Plans & Pricing</span>
-            <h3 class="text-2xl font-extrabold text-slate-900 font-heading mt-1">Upgrade Your Strs Inc Account</h3>
+            <h3 class="text-2xl font-extrabold text-slate-900 font-heading mt-1">Upgrade Your Scalezix Account</h3>
           </div>
           <button id="close-sub-modal-btn" class="text-slate-600 hover:text-slate-900 text-sm font-bold bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-xl border border-slate-300 transition">✕ Close</button>
         </div>
@@ -460,7 +460,7 @@
             }
 
             html += '</div>';
-            html += '<div class="text-center py-4"><p class="text-[11px] text-slate-500 font-medium">Powered by <span class="text-amber-400 font-semibold">Strs Inc</span> • Local Reputation & Growth Engine</p></div>';
+            html += '<div class="text-center py-4"><p class="text-[11px] text-slate-500 font-medium">Powered by <span class="text-amber-400 font-semibold">Scalezix</span> • Local Reputation & Growth Engine</p></div>';
             html += '</div>';
 
             app.innerHTML = html;
@@ -644,7 +644,7 @@
             
             // White-Theme Sticky Navbar
             html += '<header class="bg-white/90 backdrop-blur-md border-b border-slate-200 px-6 py-4 flex items-center justify-between sticky top-0 z-50 shadow-xs">';
-            html += '<div class="flex items-center gap-3"><div class="w-10 h-10 bg-gradient-to-tr from-amber-500 to-amber-400 text-slate-950 rounded-xl flex items-center justify-center font-extrabold text-xl shadow-md shadow-amber-500/20 font-heading">S</div><div><h1 class="font-extrabold text-slate-900 text-lg leading-none font-heading">Strs Inc</h1><p class="text-[11px] text-amber-600 font-semibold mt-0.5">Local Business Reputation OS</p></div></div>';
+            html += '<div class="flex items-center gap-3"><div class="w-10 h-10 bg-gradient-to-tr from-amber-500 to-amber-400 text-slate-950 rounded-xl flex items-center justify-center font-extrabold text-xl shadow-md shadow-amber-500/20 font-heading">S</div><div><h1 class="font-extrabold text-slate-900 text-lg leading-none font-heading">Scalezix</h1><p class="text-[11px] text-amber-600 font-semibold mt-0.5">Local Business Reputation OS</p></div></div>';
             html += '<div class="flex items-center gap-3"><select id="biz-select" class="bg-slate-100 border border-slate-300 rounded-xl px-3.5 py-2 text-xs text-slate-900 focus:outline-none focus:border-amber-500 font-medium">';
             businesses.forEach(b => {
               html += '<option value="' + b.id + '" ' + (b.id === activeBiz?.id ? 'selected' : '') + '>' + b.name + '</option>';
@@ -756,11 +756,11 @@
               html += '</div></div>';
             } else if (activeTab === 'tab-assistant') {
               // AI Chief-of-Staff Assistant (PRD Section 42-43, 127-128)
-              html += '<div class="bg-white border border-slate-200 rounded-3xl p-8 space-y-4 shadow-sm"><span class="text-xs font-extrabold text-amber-700 bg-amber-50 px-3 py-1 rounded-full border border-amber-200 tracking-wider">AI Executive Advisor</span><h2 class="text-2xl font-bold text-slate-900 font-heading">Strs Inc Chief-of-Staff Assistant</h2><p class="text-slate-600 text-xs">Ask questions about your business reputation, review velocity, or get instant growth recommendations.</p>';
+              html += '<div class="bg-white border border-slate-200 rounded-3xl p-8 space-y-4 shadow-sm"><span class="text-xs font-extrabold text-amber-700 bg-amber-50 px-3 py-1 rounded-full border border-amber-200 tracking-wider">AI Executive Advisor</span><h2 class="text-2xl font-bold text-slate-900 font-heading">Scalezix Chief-of-Staff Assistant</h2><p class="text-slate-600 text-xs">Ask questions about your business reputation, review velocity, or get instant growth recommendations.</p>';
               
-              html += '<div id="assistant-chat" class="bg-slate-50 p-5 rounded-2xl border border-slate-200 min-h-[160px] text-xs text-slate-800 leading-relaxed font-normal space-y-3"><div class="bg-white border border-slate-200 p-4 rounded-xl shadow-xs"><span class="text-[10px] font-bold text-amber-700 uppercase tracking-wider block mb-1">🤖 Strs Inc Chief-of-Staff</span>"Good day! Your business reputation for ' + (activeBiz?.name || 'your business') + ' is performing strongly at 4.8★ with 94% response rate. I recommend launching a weekend review request campaign to gain 15 new Google reviews!"</div></div>';
+              html += '<div id="assistant-chat" class="bg-slate-50 p-5 rounded-2xl border border-slate-200 min-h-[160px] text-xs text-slate-800 leading-relaxed font-normal space-y-3"><div class="bg-white border border-slate-200 p-4 rounded-xl shadow-xs"><span class="text-[10px] font-bold text-amber-700 uppercase tracking-wider block mb-1">🤖 Scalezix Chief-of-Staff</span>"Good day! Your business reputation for ' + (activeBiz?.name || 'your business') + ' is performing strongly at 4.8★ with 94% response rate. I recommend launching a weekend review request campaign to gain 15 new Google reviews!"</div></div>';
               
-              html += '<div class="flex gap-2"><input type="text" id="assistant-input" placeholder="Ask Strs Inc anything..." class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-xs text-slate-900 focus:outline-none focus:border-amber-500 focus:bg-white" /><button id="assistant-send-btn" class="bg-gradient-to-r from-amber-500 to-amber-400 text-slate-950 font-bold px-5 py-3 rounded-xl text-xs transition shadow-md shadow-amber-500/20 shrink-0">Send</button></div>';
+              html += '<div class="flex gap-2"><input type="text" id="assistant-input" placeholder="Ask Scalezix anything..." class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-xs text-slate-900 focus:outline-none focus:border-amber-500 focus:bg-white" /><button id="assistant-send-btn" class="bg-gradient-to-r from-amber-500 to-amber-400 text-slate-950 font-bold px-5 py-3 rounded-xl text-xs transition shadow-md shadow-amber-500/20 shrink-0">Send</button></div>';
               html += '</div>';
             }
 
@@ -786,7 +786,7 @@
                 if (subModal) {
                   const errDiv = document.getElementById('sub-error');
                   if (errDiv) {
-                    errDiv.innerText = '🔒 Action Required: Payment required to access Strs Inc. Please select a subscription plan below to activate your account.';
+                    errDiv.innerText = '🔒 Action Required: Payment required to access Scalezix. Please select a subscription plan below to activate your account.';
                     errDiv.classList.remove('hidden');
                   }
                   subModal.classList.remove('hidden');
@@ -857,7 +857,7 @@
                       key: orderData.key_id,
                       amount: orderData.amount,
                       currency: orderData.currency,
-                      name: 'Strs Inc',
+                      name: 'Scalezix',
                       description: orderData.plan_name,
                       order_id: orderData.order_id,
                       handler: async function (response) {
@@ -983,7 +983,7 @@
                   const data = await res.json();
                   const chat = document.getElementById('assistant-chat');
                   if (chat) {
-                    chat.innerHTML += '<div class="bg-amber-500/10 border border-amber-500/20 p-3 rounded-xl text-amber-300 font-medium font-mono text-[11px] mt-2">You: ' + text + '</div><div class="bg-slate-900 border border-slate-800 p-4 rounded-xl mt-2 text-white"><span class="text-[10px] font-bold text-amber-400 uppercase tracking-wider block mb-1">🤖 Strs Inc Chief-of-Staff</span>' + data.reply + '</div>';
+                    chat.innerHTML += '<div class="bg-amber-500/10 border border-amber-500/20 p-3 rounded-xl text-amber-300 font-medium font-mono text-[11px] mt-2">You: ' + text + '</div><div class="bg-slate-900 border border-slate-800 p-4 rounded-xl mt-2 text-white"><span class="text-[10px] font-bold text-amber-400 uppercase tracking-wider block mb-1">🤖 Scalezix Chief-of-Staff</span>' + data.reply + '</div>';
                   }
                   if (input) input.value = '';
                 }
@@ -1049,7 +1049,7 @@
             // 1. Sticky Glass Navbar
             html += '<header class="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-200 px-4 sm:px-8 py-3.5">';
             html += '<div class="max-w-7xl mx-auto flex items-center justify-between">';
-            html += '<div class="flex items-center gap-3"><div class="w-10 h-10 bg-gradient-to-tr from-amber-500 to-amber-400 text-slate-950 rounded-xl flex items-center justify-center font-extrabold text-xl shadow-md shadow-amber-500/20 font-heading">S</div><div><h1 class="font-extrabold text-slate-900 text-lg leading-none font-heading">Strs Inc</h1><p class="text-[11px] text-amber-600 font-semibold mt-0.5">rev.scalezix.com</p></div></div>';
+            html += '<div class="flex items-center gap-3"><div class="w-10 h-10 bg-gradient-to-tr from-amber-500 to-amber-400 text-slate-950 rounded-xl flex items-center justify-center font-extrabold text-xl shadow-md shadow-amber-500/20 font-heading">S</div><div><h1 class="font-extrabold text-slate-900 text-lg leading-none font-heading">Scalezix</h1><p class="text-[11px] text-amber-600 font-semibold mt-0.5">rev.scalezix.com</p></div></div>';
             
             // Nav Links
             html += '<nav class="hidden md:flex items-center gap-8 text-xs font-bold text-slate-600">';
@@ -1138,7 +1138,7 @@
             html += '<section id="how-it-works" class="py-16 px-4 max-w-6xl mx-auto space-y-12">';
             html += '<div class="text-center space-y-3 max-w-2xl mx-auto">';
             html += '<span class="text-xs font-extrabold uppercase tracking-wider text-amber-600 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full">Simple Process</span>';
-            html += '<h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 font-heading">How Strs Inc Works in 3 Steps</h2>';
+            html += '<h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 font-heading">How Scalezix Works in 3 Steps</h2>';
             html += '<p class="text-sm text-slate-600">Get your business setup and automating Google reviews in under 2 minutes.</p>';
             html += '</div>';
 
@@ -1159,7 +1159,7 @@
             html += '<div class="bg-white border border-slate-200 rounded-3xl p-8 space-y-4 shadow-sm relative">';
             html += '<div class="w-10 h-10 bg-amber-500 text-slate-950 font-extrabold rounded-2xl flex items-center justify-center text-lg font-heading shadow-md">3</div>';
             html += '<h3 class="text-xl font-bold text-slate-900 font-heading">Auto-Pilot Growth</h3>';
-            html += '<p class="text-xs text-slate-600 leading-relaxed">Strs Inc automatically drafts 5-star replies and collects new positive reviews to boost local Google SEO.</p>';
+            html += '<p class="text-xs text-slate-600 leading-relaxed">Scalezix automatically drafts 5-star replies and collects new positive reviews to boost local Google SEO.</p>';
             html += '</div>';
             html += '</div></section>';
 
@@ -1229,7 +1229,7 @@
             html += '<div class="text-center space-y-2">';
             html += '<span class="text-xs font-extrabold uppercase tracking-wider text-amber-600 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full">Dashboard Access</span>';
             html += '<h2 class="text-3xl font-extrabold text-slate-900 font-heading">Sign In / Register</h2>';
-            html += '<p class="text-xs text-slate-600">Enter your credentials to access your Strs Inc Merchant Dashboard</p>';
+            html += '<p class="text-xs text-slate-600">Enter your credentials to access your Scalezix Merchant Dashboard</p>';
             html += '</div>';
 
             html += '<div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-xl space-y-6">';
@@ -1254,7 +1254,7 @@
             html += '</div>';
 
             html += '<div class="space-y-4">';
-            html += '<div class="bg-slate-50 border border-slate-200 rounded-2xl p-6 space-y-2"><h4 class="font-bold text-slate-900 text-sm">How does Strs Inc generate review replies?</h4><p class="text-xs text-slate-600 leading-relaxed">Strs Inc uses fine-tuned Llama 3 models trained specifically on local business customer service standards. It creates human-like, tone-accurate responses for positive, mixed, and critical reviews.</p></div>';
+            html += '<div class="bg-slate-50 border border-slate-200 rounded-2xl p-6 space-y-2"><h4 class="font-bold text-slate-900 text-sm">How does Scalezix generate review replies?</h4><p class="text-xs text-slate-600 leading-relaxed">Scalezix uses fine-tuned Llama 3 models trained specifically on local business customer service standards. It creates human-like, tone-accurate responses for positive, mixed, and critical reviews.</p></div>';
             html += '<div class="bg-slate-50 border border-slate-200 rounded-2xl p-6 space-y-2"><h4 class="font-bold text-slate-900 text-sm">How does the QR Code collector work?</h4><p class="text-xs text-slate-600 leading-relaxed">You get a unique printable QR code for your store counter. When customers scan it, happy customers (4-5 stars) are directed straight to your Google review link, while mixed/negative feedback (1-3 stars) is sent privately to your owner inbox.</p></div>';
             html += '<div class="bg-slate-50 border border-slate-200 rounded-2xl p-6 space-y-2"><h4 class="font-bold text-slate-900 text-sm">Can I manage multiple business locations?</h4><p class="text-xs text-slate-600 leading-relaxed">Yes! Our 6-Month and 12-Month access plans support multi-location business management and multi-branch franchises from a single unified dashboard.</p></div>';
             html += '<div class="bg-slate-50 border border-slate-200 rounded-2xl p-6 space-y-2"><h4 class="font-bold text-slate-900 text-sm">What payment options are supported?</h4><p class="text-xs text-slate-600 leading-relaxed">All subscription payments are securely processed via Razorpay. We support UPI (Google Pay, PhonePe, Paytm), Credit/Debit Cards, and NetBanking with SSL encryption.</p></div>';
@@ -1409,7 +1409,7 @@
                   if (window.Razorpay && orderData.key_id !== 'rzp_test_dummy_key_id') {
                     const rzpOptions = {
                       key: orderData.key_id,
-                      name: 'Strs Inc',
+                      name: 'Scalezix',
                       description: orderData.plan_name + (orderData.is_autopay ? ' (Monthly AutoPay)' : ''),
                       prefill: { email: email, contact: phone },
                       handler: async function (response) {
