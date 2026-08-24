@@ -1,0 +1,514 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RevmeAI — Admin Panel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background: #0f172a; color: #e2e8f0; }
+    h1,h2,h3,.font-heading { font-family: 'Outfit', sans-serif; }
+    .glass { background: rgba(255,255,255,0.04); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.08); }
+    .badge-pending  { background:#fef3c7; color:#92400e; }
+    .badge-paid     { background:#d1fae5; color:#065f46; }
+    .badge-approved { background:#dbeafe; color:#1e40af; }
+    .badge-rejected { background:#fee2e2; color:#991b1b; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
+    .fade-in { animation: fadeIn .3s ease forwards; }
+    .copy-btn:active { transform: scale(0.95); }
+    /* Modal */
+    #approve-modal { display:none; }
+    #approve-modal.open { display:flex; }
+  </style>
+</head>
+<body class="min-h-screen">
+
+<!-- ── TOP NAV ─────────────────────────────────────────────────────── -->
+<nav class="glass sticky top-0 z-50 flex items-center justify-between px-6 py-3 border-b border-white/10">
+  <div class="flex items-center gap-3">
+    <div class="w-8 h-8 bg-amber-500 rounded-xl flex items-center justify-center font-extrabold text-slate-950 text-sm font-heading">R</div>
+    <span class="font-heading font-bold text-white text-lg">RevmeAI <span class="text-amber-400 text-sm font-normal">Admin</span></span>
+  </div>
+  <div class="flex items-center gap-3">
+    <div id="admin-user-badge" class="text-xs text-slate-400 hidden">Logged in as <span id="admin-email-label" class="text-amber-400 font-semibold"></span></div>
+    <button onclick="handleLogout()" class="text-xs bg-slate-700 hover:bg-slate-600 text-slate-200 px-3 py-1.5 rounded-lg transition hidden" id="logout-btn">Logout</button>
+  </div>
+</nav>
+
+<!-- ── LOGIN SCREEN ──────────────────────────────────────────────── -->
+<div id="login-screen" class="flex items-center justify-center min-h-[90vh] px-4">
+  <div class="glass rounded-3xl p-8 w-full max-w-sm space-y-5 fade-in">
+    <div class="text-center space-y-1">
+      <div class="w-14 h-14 bg-amber-500 rounded-2xl flex items-center justify-center text-2xl font-extrabold text-slate-950 mx-auto font-heading">R</div>
+      <h2 class="text-xl font-bold text-white font-heading">Admin Login</h2>
+      <p class="text-xs text-slate-400">RevmeAI Operations Panel</p>
+    </div>
+    <div class="space-y-3">
+      <input id="login-email" type="email" placeholder="Admin Email" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 transition" />
+      <input id="login-pass" type="password" placeholder="Password" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 transition" />
+      <div id="login-err" class="hidden text-xs text-rose-400 font-medium text-center py-1"></div>
+      <button onclick="doAdminLogin()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3 rounded-xl text-sm transition">Sign In →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── MAIN DASHBOARD ─────────────────────────────────────────────── -->
+<div id="dashboard" class="hidden max-w-7xl mx-auto px-4 py-8 space-y-6">
+
+  <!-- Stats Row -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="stats-row">
+    <div class="glass rounded-2xl p-4 space-y-1">
+      <div class="text-xs text-slate-400 uppercase tracking-wider">Pending Approval</div>
+      <div class="text-3xl font-bold text-amber-400 font-heading" id="stat-pending">—</div>
+    </div>
+    <div class="glass rounded-2xl p-4 space-y-1">
+      <div class="text-xs text-slate-400 uppercase tracking-wider">Approved Today</div>
+      <div class="text-3xl font-bold text-emerald-400 font-heading" id="stat-approved">—</div>
+    </div>
+    <div class="glass rounded-2xl p-4 space-y-1">
+      <div class="text-xs text-slate-400 uppercase tracking-wider">Total Revenue</div>
+      <div class="text-3xl font-bold text-blue-400 font-heading" id="stat-revenue">—</div>
+    </div>
+    <div class="glass rounded-2xl p-4 space-y-1">
+      <div class="text-xs text-slate-400 uppercase tracking-wider">Total Accounts</div>
+      <div class="text-3xl font-bold text-purple-400 font-heading" id="stat-total">—</div>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <h2 class="font-heading font-bold text-white text-xl">Pending Accounts</h2>
+    <div class="flex items-center gap-2">
+      <select id="filter-status" onchange="loadAccounts()" class="bg-slate-800 border border-slate-700 text-sm text-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:border-amber-500">
+        <option value="paid_pending_manual_approval">Awaiting Approval</option>
+        <option value="approved">Approved</option>
+        <option value="all">All</option>
+      </select>
+      <button onclick="loadAccounts()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 text-sm px-4 py-2 rounded-xl transition flex items-center gap-1.5">
+        ↻ Refresh
+      </button>
+      <button onclick="exportCSV()" class="bg-emerald-700 hover:bg-emerald-600 text-white text-sm px-4 py-2 rounded-xl transition">
+        ⬇ Export CSV
+      </button>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="glass rounded-2xl overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b border-white/10 text-left">
+            <th class="px-4 py-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider">ID</th>
+            <th class="px-4 py-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Customer</th>
+            <th class="px-4 py-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Business</th>
+            <th class="px-4 py-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Plan</th>
+            <th class="px-4 py-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Amount</th>
+            <th class="px-4 py-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Status</th>
+            <th class="px-4 py-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Date</th>
+            <th class="px-4 py-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="accounts-table-body">
+          <tr><td colspan="8" class="text-center py-12 text-slate-500">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ── APPROVE MODAL ───────────────────────────────────────────────── -->
+<div id="approve-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm items-center justify-center p-4">
+  <div class="glass rounded-3xl p-6 w-full max-w-lg space-y-5 fade-in max-h-[90vh] overflow-y-auto">
+    <div class="flex items-center justify-between">
+      <h3 class="font-heading font-bold text-white text-lg">Approve & Activate Account</h3>
+      <button onclick="closeModal()" class="text-slate-400 hover:text-white text-xl">✕</button>
+    </div>
+
+    <!-- Customer Info -->
+    <div class="bg-slate-800/60 rounded-2xl p-4 space-y-2 text-sm">
+      <div class="flex justify-between"><span class="text-slate-400">Name / Phone</span><span class="text-white font-medium" id="modal-phone">—</span></div>
+      <div class="flex justify-between"><span class="text-slate-400">Email</span><span class="text-amber-300 font-mono text-xs" id="modal-email">—</span></div>
+      <div class="flex justify-between"><span class="text-slate-400">Business</span><span class="text-white font-medium" id="modal-biz">—</span></div>
+      <div class="flex justify-between"><span class="text-slate-400">Plan</span><span class="text-emerald-400 font-bold" id="modal-plan">—</span></div>
+      <div class="flex justify-between"><span class="text-slate-400">Amount Paid</span><span class="text-white font-bold" id="modal-amount">—</span></div>
+      <div class="flex justify-between"><span class="text-slate-400">Payment ID</span><span class="text-blue-300 font-mono text-xs" id="modal-payid">—</span></div>
+    </div>
+
+    <!-- Credentials -->
+    <div class="space-y-3">
+      <div class="text-xs font-bold text-slate-300 uppercase tracking-wider">Generated Credentials</div>
+      <div class="flex gap-2">
+        <input id="final-email" type="email" placeholder="Login Email" class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500" />
+      </div>
+      <div class="flex gap-2">
+        <input id="final-pass" type="text" placeholder="Generated Password" class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500" />
+        <button onclick="generatePassword()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 px-3 py-2.5 rounded-xl text-xs transition whitespace-nowrap">🔄 New</button>
+      </div>
+    </div>
+
+    <!-- WhatsApp Preview -->
+    <div class="space-y-2">
+      <div class="text-xs font-bold text-slate-300 uppercase tracking-wider">WhatsApp Message (ready to copy)</div>
+      <div class="bg-emerald-950/40 border border-emerald-800/40 rounded-2xl p-4">
+        <pre id="whatsapp-preview" class="text-xs text-emerald-200 whitespace-pre-wrap leading-relaxed font-mono"></pre>
+      </div>
+      <button onclick="copyWhatsApp()" class="copy-btn w-full bg-emerald-700 hover:bg-emerald-600 text-white text-sm font-bold py-2.5 rounded-xl transition flex items-center justify-center gap-2">
+        📋 Copy WhatsApp Message
+      </button>
+    </div>
+
+    <!-- Google Sheets Sync -->
+    <div id="sheets-status" class="hidden text-xs text-center py-1 rounded-lg font-medium"></div>
+
+    <!-- Approve Button -->
+    <div class="flex gap-2 pt-1">
+      <button onclick="closeModal()" class="flex-1 border border-slate-600 text-slate-300 py-3 rounded-xl text-sm hover:bg-slate-800 transition">Cancel</button>
+      <button onclick="submitApproval()" id="approve-btn" class="flex-1 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3 rounded-xl text-sm transition">
+        ✅ Approve & Activate
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── TOAST ───────────────────────────────────────────────────────── -->
+<div id="toast" class="fixed bottom-6 right-6 z-[999] hidden">
+  <div class="glass rounded-2xl px-5 py-3 text-sm font-semibold text-white shadow-2xl fade-in" id="toast-text"></div>
+</div>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────────────────
+const API_BASE = '/api/v1';
+let adminToken  = localStorage.getItem('admin_token') || '';
+let adminEmail  = localStorage.getItem('admin_email') || '';
+let currentRecord = null;
+// Set your Google Sheets webhook URL here (Apps Script Web App URL)
+let SHEETS_WEBHOOK = localStorage.getItem('sheets_webhook') || '';
+
+// ── INIT ─────────────────────────────────────────────────────────────
+window.onload = () => {
+  if (adminToken) {
+    showDashboard();
+    loadAccounts();
+  }
+
+  // Prompt for Sheets webhook if not set
+  const whUrl = new URLSearchParams(location.search).get('sheets');
+  if (whUrl) {
+    SHEETS_WEBHOOK = whUrl;
+    localStorage.setItem('sheets_webhook', whUrl);
+  }
+};
+
+// ── AUTH ──────────────────────────────────────────────────────────────
+async function doAdminLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass  = document.getElementById('login-pass').value.trim();
+  const errEl = document.getElementById('login-err');
+  errEl.classList.add('hidden');
+
+  try {
+    const res  = await fetch(`${API_BASE}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password: pass })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Login failed');
+
+    adminToken = data.token;
+    adminEmail = email;
+    localStorage.setItem('admin_token', adminToken);
+    localStorage.setItem('admin_email', adminEmail);
+    showDashboard();
+    loadAccounts();
+  } catch(e) {
+    errEl.innerText = '❌ ' + e.message;
+    errEl.classList.remove('hidden');
+  }
+}
+
+function handleLogout() {
+  localStorage.removeItem('admin_token');
+  localStorage.removeItem('admin_email');
+  adminToken = '';
+  location.reload();
+}
+
+function showDashboard() {
+  document.getElementById('login-screen').classList.add('hidden');
+  document.getElementById('dashboard').classList.remove('hidden');
+  document.getElementById('logout-btn').classList.remove('hidden');
+  document.getElementById('admin-user-badge').classList.remove('hidden');
+  document.getElementById('admin-email-label').innerText = adminEmail;
+}
+
+// ── LOAD ACCOUNTS ──────────────────────────────────────────────────
+async function loadAccounts() {
+  const tbody  = document.getElementById('accounts-table-body');
+  const status = document.getElementById('filter-status').value;
+  tbody.innerHTML = `<tr><td colspan="8" class="text-center py-12 text-slate-500">Loading...</td></tr>`;
+
+  try {
+    const res  = await fetch(`${API_BASE}/payments/admin/pending-accounts`, {
+      headers: { 'Authorization': 'Bearer ' + adminToken }
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Failed to load');
+
+    let rows = data.pending_accounts || [];
+    if (status !== 'all') rows = rows.filter(r => r.status === status);
+
+    // Update stats
+    const allRows = data.pending_accounts || [];
+    const today = new Date().toDateString();
+    document.getElementById('stat-pending').innerText  = allRows.filter(r => r.status === 'paid_pending_manual_approval').length;
+    document.getElementById('stat-approved').innerText = allRows.filter(r => r.status === 'approved' && new Date(r.updated_at || r.created_at).toDateString() === today).length;
+    document.getElementById('stat-total').innerText    = allRows.length;
+    const totalRev = allRows.filter(r => r.status === 'approved').reduce((s,r) => s + Number(r.amount || 0), 0);
+    document.getElementById('stat-revenue').innerText  = '₹' + totalRev.toLocaleString('en-IN');
+
+    if (rows.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="8" class="text-center py-12 text-slate-500">No records found</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = rows.map(r => `
+      <tr class="border-b border-white/5 hover:bg-white/5 transition cursor-pointer" onclick="openModal(${r.id})">
+        <td class="px-4 py-3 text-slate-400 font-mono text-xs">#${r.id}</td>
+        <td class="px-4 py-3">
+          <div class="font-medium text-white text-sm">${r.phone || '—'}</div>
+          <div class="text-xs text-slate-400">${r.email}</div>
+        </td>
+        <td class="px-4 py-3 text-sm text-slate-200">${r.business_name || '—'}</td>
+        <td class="px-4 py-3">
+          <span class="text-xs font-bold px-2 py-1 bg-slate-700 text-amber-300 rounded-lg">${formatPlan(r.plan)}</span>
+        </td>
+        <td class="px-4 py-3 text-sm font-bold text-emerald-400">₹${Number(r.amount || 0).toLocaleString('en-IN')}</td>
+        <td class="px-4 py-3">
+          <span class="badge-${r.status === 'paid_pending_manual_approval' ? 'paid' : r.status} text-[10px] font-bold px-2 py-1 rounded-full">
+            ${r.status === 'paid_pending_manual_approval' ? '⏳ Awaiting' : r.status === 'approved' ? '✅ Approved' : r.status}
+          </span>
+        </td>
+        <td class="px-4 py-3 text-xs text-slate-400">${formatDate(r.created_at)}</td>
+        <td class="px-4 py-3">
+          ${r.status === 'paid_pending_manual_approval' 
+            ? `<button onclick="event.stopPropagation();openModal(${r.id})" class="bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold px-3 py-1.5 rounded-lg transition">Approve</button>` 
+            : `<button onclick="event.stopPropagation();openModal(${r.id})" class="border border-slate-600 text-slate-300 text-xs px-3 py-1.5 rounded-lg hover:bg-slate-700 transition">View</button>`}
+        </td>
+      </tr>
+    `).join('');
+
+    // Store for modal lookup
+    window.__accounts = rows;
+    window.__allAccounts = allRows;
+
+  } catch(e) {
+    tbody.innerHTML = `<tr><td colspan="8" class="text-center py-12 text-rose-400">Error: ${e.message}</td></tr>`;
+  }
+}
+
+// ── MODAL ─────────────────────────────────────────────────────────────
+function openModal(id) {
+  const accounts = window.__allAccounts || window.__accounts || [];
+  const r = accounts.find(a => a.id === id);
+  if (!r) return;
+  currentRecord = r;
+
+  document.getElementById('modal-phone').innerText   = r.phone || '—';
+  document.getElementById('modal-email').innerText   = r.email;
+  document.getElementById('modal-biz').innerText     = r.business_name || '—';
+  document.getElementById('modal-plan').innerText    = formatPlan(r.plan) + ' — ₹' + Number(r.amount || 0).toLocaleString('en-IN');
+  document.getElementById('modal-amount').innerText  = '₹' + Number(r.amount || 0).toLocaleString('en-IN');
+  document.getElementById('modal-payid').innerText   = r.payment_id || 'Not captured yet';
+
+  // Pre-fill email and auto-generate password
+  document.getElementById('final-email').value = r.email;
+  generatePassword();
+
+  document.getElementById('approve-modal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('approve-modal').classList.remove('open');
+  currentRecord = null;
+}
+
+// ── PASSWORD GENERATOR ────────────────────────────────────────────────
+function generatePassword() {
+  if (!currentRecord) return;
+  const name = (currentRecord.business_name || currentRecord.phone || 'User').replace(/\s+/g, '').slice(0, 6);
+  const year  = new Date().getFullYear();
+  const sym   = ['@', '#', '!'][Math.floor(Math.random() * 3)];
+  const num   = Math.floor(100 + Math.random() * 900);
+  const pass  = `${name}${sym}${year}${num}`;
+  document.getElementById('final-pass').value = pass;
+  updateWhatsAppPreview();
+}
+
+// ── WHATSAPP PREVIEW ──────────────────────────────────────────────────
+function updateWhatsAppPreview() {
+  if (!currentRecord) return;
+  const email = document.getElementById('final-email').value || currentRecord.email;
+  const pass  = document.getElementById('final-pass').value || '—';
+  const plan  = formatPlan(currentRecord.plan);
+  const biz   = currentRecord.business_name || 'Your Business';
+
+  const msg = `Hi! 👋
+
+Your *RevmeAI* account is now *ACTIVE!* 🎉
+
+Here are your login details:
+
+🌐 *Login URL:* https://rev.scalezix.com
+📧 *Email:* ${email}
+🔑 *Password:* ${pass}
+📦 *Plan:* ${plan}
+🏢 *Business:* ${biz}
+
+*Next Steps:*
+1️⃣ Login at rev.scalezix.com
+2️⃣ Go to Dashboard → Business Profile
+3️⃣ Add your Google Review link
+4️⃣ Download your QR Code
+5️⃣ Place QR at your counter
+
+Need help? WhatsApp us anytime!
+— *Strs Inc Team* ✨`;
+
+  document.getElementById('whatsapp-preview').innerText = msg;
+}
+
+// Auto-update preview when fields change
+document.addEventListener('DOMContentLoaded', () => {
+  ['final-email','final-pass'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', updateWhatsAppPreview);
+  });
+});
+
+function copyWhatsApp() {
+  const text = document.getElementById('whatsapp-preview').innerText;
+  navigator.clipboard.writeText(text).then(() => showToast('✅ WhatsApp message copied!'));
+}
+
+// ── SUBMIT APPROVAL ───────────────────────────────────────────────────
+async function submitApproval() {
+  if (!currentRecord) return;
+  const btn       = document.getElementById('approve-btn');
+  const finalEmail= document.getElementById('final-email').value.trim();
+  const finalPass = document.getElementById('final-pass').value.trim();
+
+  if (!finalEmail || !finalPass) { showToast('⚠️ Fill in email and password'); return; }
+
+  btn.disabled = true;
+  btn.innerText = 'Activating...';
+
+  try {
+    const res  = await fetch(`${API_BASE}/payments/admin/approve-account`, {
+      method:  'POST',
+      headers: { 'Authorization': 'Bearer ' + adminToken, 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ pending_id: currentRecord.id, final_email: finalEmail, final_password: finalPass })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Approval failed');
+
+    // Sync to Google Sheets
+    await syncToSheets({
+      id:            currentRecord.id,
+      phone:         currentRecord.phone,
+      email:         finalEmail,
+      password:      finalPass,
+      business_name: currentRecord.business_name,
+      plan:          formatPlan(currentRecord.plan),
+      amount:        currentRecord.amount,
+      payment_id:    currentRecord.payment_id,
+      approved_at:   new Date().toLocaleString('en-IN'),
+      whatsapp_msg:  document.getElementById('whatsapp-preview').innerText
+    });
+
+    showToast('✅ Account activated! Copy the WhatsApp message and send it.');
+    closeModal();
+    loadAccounts();
+  } catch(e) {
+    showToast('❌ ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerText = '✅ Approve & Activate';
+  }
+}
+
+// ── GOOGLE SHEETS SYNC ────────────────────────────────────────────────
+async function syncToSheets(data) {
+  const sheetsEl = document.getElementById('sheets-status');
+  if (!SHEETS_WEBHOOK) {
+    sheetsEl.className = 'text-xs text-center py-1 rounded-lg font-medium bg-slate-700 text-slate-300 block';
+    sheetsEl.innerText = 'ℹ️ Google Sheets not connected (set webhook URL)';
+    return;
+  }
+  try {
+    await fetch(SHEETS_WEBHOOK, {
+      method: 'POST',
+      mode:   'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body:   JSON.stringify(data)
+    });
+    sheetsEl.className = 'text-xs text-center py-1 rounded-lg font-medium bg-emerald-900 text-emerald-300 block';
+    sheetsEl.innerText = '✅ Synced to Google Sheets!';
+  } catch(e) {
+    sheetsEl.className = 'text-xs text-center py-1 rounded-lg font-medium bg-rose-900 text-rose-300 block';
+    sheetsEl.innerText = '⚠️ Sheet sync failed: ' + e.message;
+  }
+}
+
+// ── EXPORT CSV ────────────────────────────────────────────────────────
+function exportCSV() {
+  const rows = window.__allAccounts || [];
+  if (!rows.length) { showToast('No data to export'); return; }
+
+  const headers = ['ID','Phone','Email','Business','Plan','Amount','Status','Payment ID','Created At'];
+  const csvRows = [headers.join(','), ...rows.map(r => [
+    r.id, r.phone, r.email, `"${r.business_name || ''}"`,
+    r.plan, r.amount, r.status, r.payment_id || '',
+    formatDate(r.created_at)
+  ].join(','))];
+
+  const blob = new Blob([csvRows.join('\n')], { type: 'text/csv' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = `revmeai_users_${Date.now()}.csv`; a.click();
+  showToast('✅ CSV exported!');
+}
+
+// ── HELPERS ───────────────────────────────────────────────────────────
+function formatPlan(p) {
+  return p === '1_month' ? '1 Month (₹1,000)' : p === '6_months' ? '6 Months (₹4,000)' : p === '12_months' ? '12 Months (₹5,000)' : p;
+}
+
+function formatDate(d) {
+  if (!d) return '—';
+  return new Date(d).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+}
+
+function showToast(msg, duration = 3500) {
+  const t = document.getElementById('toast');
+  const txt = document.getElementById('toast-text');
+  txt.innerText = msg;
+  t.classList.remove('hidden');
+  setTimeout(() => t.classList.add('hidden'), duration);
+}
+
+// Close modal on backdrop click
+document.getElementById('approve-modal').addEventListener('click', (e) => {
+  if (e.target === e.currentTarget) closeModal();
+});
+
+// Login on Enter key
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !adminToken) doAdminLogin();
+});
+</script>
+</body>
+</html>
