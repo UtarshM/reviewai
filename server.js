@@ -14,6 +14,7 @@ import insightsRoutes from './routes/insights.js';
 import publicRoutes from './routes/public.js';
 import paymentRoutes from './routes/payments.js';
 import reviewAcquisitionRoutes from './routes/reviewAcquisition.js';
+import { createPublicOrder, verifyPublicPayment } from './routes/publicPayments.js';
 
 dotenv.config();
 
@@ -54,6 +55,25 @@ app.get('/api/v1/health', (req, res) => {
   });
 });
 
+// ── PUBLIC PAYMENT ROUTES (no auth) ──────────────────────────────────────────
+// Registered directly on app BEFORE paymentRoutes so authMiddleware never fires
+app.options('/api/v1/payments/create-public-order', (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  return res.sendStatus(204);
+});
+app.post('/api/v1/payments/create-public-order', createPublicOrder);
+
+app.options('/api/v1/payments/verify-public-payment', (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  return res.sendStatus(204);
+});
+app.post('/api/v1/payments/verify-public-payment', verifyPublicPayment);
+
+// ── AUTHENTICATED API ROUTES ──────────────────────────────────────────────────
 // API Routes (reviewAcquisitionRoutes first for /api/v1/public/business/:slug)
 app.use('/api/v1', reviewAcquisitionRoutes);
 app.use('/api/v1/auth', authRoutes);
