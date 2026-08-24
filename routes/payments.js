@@ -47,7 +47,17 @@ const PLANS = {
 // ----------------------------------------------------------------------
 
 // POST /api/v1/payments/create-public-order
+// POST /api/v1/payments/create-public-order (public, no auth)
+router.options('/create-public-order', (req, res) => {
+  // Allow any origin for preflight requests
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  return res.sendStatus(204);
+});
 router.post('/create-public-order', async (req, res) => {
+  // Explicitly allow all origins for this endpoint
+  res.setHeader('Access-Control-Allow-Origin', '*');
   try {
     const { email, phone, password, business_name, plan, coupon_code } = req.body;
 
