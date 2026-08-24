@@ -23,9 +23,9 @@ if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
 }
 
 const PLANS = {
-  '1_month':  { name: '1 Month Access',  amount: 100000, durationMonths: 1,  displayPrice: '₹1,000' },
-  '6_months': { name: '6 Months Access', amount: 400000, durationMonths: 6,  displayPrice: '₹4,000' },
-  '12_months':{ name: '12 Months Access',amount: 500000, durationMonths: 12, displayPrice: '₹5,000' }
+  '1_month':  { name: '1 Month Access',  baseAmount: 1000, amount: 118000, durationMonths: 1,  displayPrice: '₹1,180 (incl. 18% GST)' },
+  '6_months': { name: '6 Months Access', baseAmount: 4000, amount: 472000, durationMonths: 6,  displayPrice: '₹4,720 (incl. 18% GST)' },
+  '12_months':{ name: '12 Months Access',baseAmount: 5000, amount: 590000, durationMonths: 12, displayPrice: '₹5,900 (incl. 18% GST)' }
 };
 
 // POST /api/v1/payments/create-public-order — NO AUTH

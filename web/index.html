@@ -278,17 +278,17 @@
           <div id="pub-gst-summary" class="bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-xs text-slate-700 space-y-1.5">
             <div class="flex justify-between">
               <span class="text-slate-500">Base Price</span>
-              <span id="gst-base" class="font-semibold text-slate-800">₹3,389</span>
+              <span id="gst-base" class="font-semibold text-slate-800">₹4,000</span>
             </div>
             <div class="flex justify-between">
               <span class="text-slate-500">GST (18%)</span>
-              <span id="gst-amount" class="font-semibold text-slate-800">₹611</span>
+              <span id="gst-amount" class="font-semibold text-slate-800">₹720</span>
             </div>
             <div class="flex justify-between border-t border-slate-200 pt-1.5 mt-1">
               <span class="font-bold text-slate-900">Total Payable</span>
-              <span id="gst-total" class="font-extrabold text-amber-600">₹4,000</span>
+              <span id="gst-total" class="font-extrabold text-amber-600">₹4,720</span>
             </div>
-            <div class="text-[9px] text-slate-400 text-center">GST @ 18% included as per Indian tax regulations (SAC 998314)</div>
+            <div class="text-[9px] text-slate-400 text-center">GST @ 18% added as per Indian tax regulations (SAC 998314)</div>
           </div>
 
           <div id="pub-error" class="hidden bg-rose-50 border border-rose-200 text-rose-700 p-3 rounded-2xl text-xs font-medium"></div>
@@ -1292,24 +1292,24 @@
               };
             });
 
-            // ── GST CALCULATION HELPERS (18% GST inclusive) ────────────────────
+            // ── GST CALCULATION HELPERS (18% GST exclusive) ────────────────────
             const GST_RATE = 0.18;
-            const PLAN_TOTALS = { '1_month': 1000, '6_months': 4000, '12_months': 5000 };
-            const PLAN_TOTALS_COUPON = { '1_month': 10, '6_months': 40, '12_months': 50 };
+            const PLAN_BASES = { '1_month': 1000, '6_months': 4000, '12_months': 5000 };
+            const PLAN_BASES_COUPON = { '1_month': 10, '6_months': 40, '12_months': 50 };
 
             function fmtINR(amount) {
               return '₹' + Math.round(amount).toLocaleString('en-IN');
             }
 
-            function updateGSTSummary(totalAmount) {
-              const base   = totalAmount / (1 + GST_RATE);
-              const gst    = totalAmount - base;
+            function updateGSTSummary(basePrice) {
+              const gst    = basePrice * GST_RATE;
+              const total  = basePrice + gst;
               const bEl    = document.getElementById('gst-base');
               const gEl    = document.getElementById('gst-amount');
               const tEl    = document.getElementById('gst-total');
-              if (bEl) bEl.innerText = fmtINR(base);
+              if (bEl) bEl.innerText = fmtINR(basePrice);
               if (gEl) gEl.innerText = fmtINR(gst);
-              if (tEl) tEl.innerText = fmtINR(totalAmount);
+              if (tEl) tEl.innerText = fmtINR(total);
             }
 
             function getActiveCoupon() {
@@ -1320,8 +1320,8 @@
             function refreshGST() {
               const plan   = document.querySelector('input[name="pub-plan"]:checked')?.value || '6_months';
               const coupon = getActiveCoupon();
-              const total  = coupon === 'SCA99' ? PLAN_TOTALS_COUPON[plan] : PLAN_TOTALS[plan];
-              updateGSTSummary(total || PLAN_TOTALS['6_months']);
+              const base   = coupon === 'SCA99' ? PLAN_BASES_COUPON[plan] : PLAN_BASES[plan];
+              updateGSTSummary(base || PLAN_BASES['6_months']);
             }
 
             // Update GST when plan changes
@@ -1329,7 +1329,7 @@
               radio.addEventListener('change', refreshGST);
             });
 
-            // Initialise GST box for default selected plan (6_months = ₹4,000)
+            // Initialise GST box for default selected plan (6_months = Base ₹4,000 + GST ₹720 = Total ₹4,720)
             refreshGST();
 
             // Public Coupon Apply Handler

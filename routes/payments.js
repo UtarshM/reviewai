@@ -24,21 +24,21 @@ if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
 const PLANS = {
   '1_month': {
     name: '1 Month Access',
-    amount: 100000, // INR 1,000 in paise
+    amount: 118000, // INR 1,180 in paise (₹1,000 + 18% GST)
     durationMonths: 1,
-    displayPrice: '₹1,000'
+    displayPrice: '₹1,180'
   },
   '6_months': {
     name: '6 Months Access',
-    amount: 400000, // INR 4,000 in paise
+    amount: 472000, // INR 4,720 in paise (₹4,000 + 18% GST)
     durationMonths: 6,
-    displayPrice: '₹4,000'
+    displayPrice: '₹4,720'
   },
   '12_months': {
     name: '12 Months Access',
-    amount: 500000, // INR 5,000 in paise
+    amount: 590000, // INR 5,900 in paise (₹5,000 + 18% GST)
     durationMonths: 12,
-    displayPrice: '₹5,000'
+    displayPrice: '₹5,900'
   }
 };
 
