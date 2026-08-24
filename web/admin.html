@@ -1,4 +1,5 @@
 <!doctype html>
+<!-- Google Sheets Webhook: https://script.google.com/macros/s/AKfycbwgtuf8nhdm0sSXXnwc8Y82mqlkQTfVg3tol2UQIcPe6L_EjKz4aLHxeKgznoqRCj0Uug/exec -->
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -32,6 +33,9 @@
     <span class="font-heading font-bold text-white text-lg">RevmeAI <span class="text-amber-400 text-sm font-normal">Admin</span></span>
   </div>
   <div class="flex items-center gap-3">
+    <a href="https://docs.google.com/spreadsheets" target="_blank" class="hidden md:flex items-center gap-1.5 text-xs bg-emerald-900/60 border border-emerald-700/50 text-emerald-300 px-3 py-1.5 rounded-lg hover:bg-emerald-800/60 transition" title="Open Google Sheet">
+      <span>🟢</span> Sheets Connected
+    </a>
     <div id="admin-user-badge" class="text-xs text-slate-400 hidden">Logged in as <span id="admin-email-label" class="text-amber-400 font-semibold"></span></div>
     <button onclick="handleLogout()" class="text-xs bg-slate-700 hover:bg-slate-600 text-slate-200 px-3 py-1.5 rounded-lg transition hidden" id="logout-btn">Logout</button>
   </div>
@@ -185,7 +189,7 @@ let adminToken  = localStorage.getItem('admin_token') || '';
 let adminEmail  = localStorage.getItem('admin_email') || '';
 let currentRecord = null;
 // Set your Google Sheets webhook URL here (Apps Script Web App URL)
-let SHEETS_WEBHOOK = localStorage.getItem('sheets_webhook') || '';
+let SHEETS_WEBHOOK = 'https://script.google.com/macros/s/AKfycbwgtuf8nhdm0sSXXnwc8Y82mqlkQTfVg3tol2UQIcPe6L_EjKz4aLHxeKgznoqRCj0Uug/exec';
 
 // ── INIT ─────────────────────────────────────────────────────────────
 window.onload = () => {
