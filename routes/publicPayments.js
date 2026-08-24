@@ -50,21 +50,58 @@ export async function createPublicOrder(req, res) {
       const code = String(coupon_code).trim().toUpperCase();
       if (code === 'SCA99') {
         discountApplied = true;
-        finalAmount = Math.max(100, Math.round(selectedPlan.amount * 0.01));
+        const base = (selectedPlan.baseAmount || 1000) * 0.01;
+        finalAmount = Math.max(100, Math.round(base * 1.18 * 100));
       }
     }
 
     let orderId = `order_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+    let subscriptionId = null;
+    let isAutoPay = (plan === '1_month');
 
     if (razorpayInstance) {
-      const options = {
-        amount:   finalAmount,
-        currency: 'INR',
-        receipt:  `rcpt_pub_${Date.now()}`,
-        notes: { email: cleanEmail, phone: cleanPhone, plan, coupon: coupon_code || '' }
-      };
-      const order = await razorpayInstance.orders.create(options);
-      orderId = order.id;
+      if (isAutoPay) {
+        try {
+          let planId = process.env.RAZORPAY_MONTHLY_PLAN_ID;
+          if (!planId) {
+            const newPlan = await razorpayInstance.plans.create({
+              period: 'monthly',
+              interval: 1,
+              item: {
+                name: 'Monthly Sub (RevmeAI)',
+                amount: finalAmount,
+                currency: 'INR',
+                description: 'Monthly AutoPay Access'
+              }
+            });
+            planId = newPlan.id;
+          }
+          if (planId) {
+            const sub = await razorpayInstance.subscriptions.create({
+              plan_id: planId,
+              total_count: 12,
+              quantity: 1,
+              customer_notify: 1,
+              notes: { email: cleanEmail, phone: cleanPhone, plan }
+            });
+            subscriptionId = sub.id;
+            orderId = sub.id;
+          }
+        } catch (subErr) {
+          console.warn('Subscription creation fallback to order:', subErr.message);
+        }
+      }
+
+      if (!subscriptionId) {
+        const options = {
+          amount:   finalAmount,
+          currency: 'INR',
+          receipt:  `rcpt_pub_${Date.now()}`,
+          notes: { email: cleanEmail, phone: cleanPhone, plan, coupon: coupon_code || '' }
+        };
+        const order = await razorpayInstance.orders.create(options);
+        orderId = order.id;
+      }
     }
 
     await query(
@@ -75,6 +112,8 @@ export async function createPublicOrder(req, res) {
 
     return res.status(200).json({
       order_id:        orderId,
+      subscription_id: subscriptionId,
+      is_autopay:      isAutoPay,
       amount:          finalAmount,
       currency:        'INR',
       key_id:          RAZORPAY_KEY_ID,
@@ -101,11 +140,11 @@ export async function verifyPublicPayment(req, res) {
     const cleanPhone = (phone  || '').trim();
 
     if (process.env.RAZORPAY_KEY_SECRET && razorpay_signature && razorpay_signature !== 'demo_sig') {
-      const body = razorpay_order_id + '|' + razorpay_payment_id;
-      const expected = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
-                             .update(body)
-                             .digest('hex');
-      if (expected !== razorpay_signature) {
+      const body1 = razorpay_order_id + '|' + razorpay_payment_id;
+      const body2 = razorpay_payment_id + '|' + razorpay_order_id;
+      const expected1 = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET).update(body1).digest('hex');
+      const expected2 = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET).update(body2).digest('hex');
+      if (expected1 !== razorpay_signature && expected2 !== razorpay_signature) {
         return res.status(400).json({ error: 'payment_failed', message: 'Invalid payment signature' });
       }
     }

@@ -250,11 +250,12 @@
           <div>
             <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-2">Select Subscription Plan *</label>
             <div class="grid grid-cols-3 gap-2">
-              <label class="border-2 border-slate-200 has-[:checked]:border-amber-500 rounded-2xl p-3 text-center cursor-pointer bg-slate-50 has-[:checked]:bg-amber-50/50 transition">
+              <label class="border-2 border-slate-200 has-[:checked]:border-amber-500 rounded-2xl p-3 text-center cursor-pointer bg-slate-50 has-[:checked]:bg-amber-50/50 transition relative">
+                <span class="absolute -top-2 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-[8px] font-extrabold px-1.5 py-0.2 rounded-full tracking-wider">AUTOPAY</span>
                 <input type="radio" name="pub-plan" value="1_month" class="sr-only" />
-                <div class="text-[10px] font-bold text-amber-700 uppercase">Monthly</div>
+                <div class="text-[10px] font-bold text-amber-700 uppercase mt-1">Monthly</div>
                 <div class="text-sm font-extrabold text-slate-900 font-heading mt-0.5" id="pub-price-1">₹1,000</div>
-                <div class="text-[9px] text-slate-500">1 Month</div>
+                <div class="text-[9px] text-blue-600 font-bold">Auto-Debit</div>
               </label>
 
               <label class="border-2 border-slate-200 has-[:checked]:border-amber-500 rounded-2xl p-3 text-center cursor-pointer bg-slate-50 has-[:checked]:bg-amber-100/50 transition relative">
@@ -289,6 +290,7 @@
               <span id="gst-total" class="font-extrabold text-amber-600">₹4,720</span>
             </div>
             <div class="text-[9px] text-slate-400 text-center">GST @ 18% added as per Indian tax regulations (SAC 998314)</div>
+            <div id="autopay-note" class="hidden text-[9px] text-blue-600 font-bold text-center border-t border-slate-200 pt-1 mt-1">🔄 Monthly AutoPay Subscription • Auto-renews monthly</div>
           </div>
 
           <div id="pub-error" class="hidden bg-rose-50 border border-rose-200 text-rose-700 p-3 rounded-2xl text-xs font-medium"></div>
@@ -1322,6 +1324,16 @@
               const coupon = getActiveCoupon();
               const base   = coupon === 'SCA99' ? PLAN_BASES_COUPON[plan] : PLAN_BASES[plan];
               updateGSTSummary(base || PLAN_BASES['6_months']);
+
+              const btn = document.getElementById('pub-submit-btn');
+              const autoNote = document.getElementById('autopay-note');
+              if (plan === '1_month') {
+                if (btn) btn.innerText = 'Proceed to AutoPay Subscription →';
+                if (autoNote) autoNote.classList.remove('hidden');
+              } else {
+                if (btn) btn.innerText = 'Proceed to Razorpay Payment →';
+                if (autoNote) autoNote.classList.add('hidden');
+              }
             }
 
             // Update GST when plan changes
@@ -1395,18 +1407,28 @@
 
                   // Handle Razorpay Checkout or Demo Verification
                   if (window.Razorpay && orderData.key_id !== 'rzp_test_dummy_key_id') {
-                    const rzp = new window.Razorpay({
+                    const rzpOptions = {
                       key: orderData.key_id,
-                      amount: orderData.amount,
-                      currency: orderData.currency,
                       name: 'Strs Inc',
-                      description: orderData.plan_name,
-                      order_id: orderData.order_id,
+                      description: orderData.plan_name + (orderData.is_autopay ? ' (Monthly AutoPay)' : ''),
                       prefill: { email: email, contact: phone },
                       handler: async function (response) {
-                        await verifyPublicPayment(response.razorpay_order_id, response.razorpay_payment_id, response.razorpay_signature, email, phone, password, bizName, plan);
+                        const payId = response.razorpay_payment_id;
+                        const orderId = response.razorpay_order_id || response.razorpay_subscription_id || orderData.order_id;
+                        const sig = response.razorpay_signature;
+                        await verifyPublicPayment(orderId, payId, sig, email, phone, password, bizName, plan);
                       }
-                    });
+                    };
+
+                    if (orderData.subscription_id) {
+                      rzpOptions.subscription_id = orderData.subscription_id;
+                    } else {
+                      rzpOptions.amount = orderData.amount;
+                      rzpOptions.currency = orderData.currency;
+                      rzpOptions.order_id = orderData.order_id;
+                    }
+
+                    const rzp = new window.Razorpay(rzpOptions);
                     rzp.open();
                   } else {
                     await verifyPublicPayment(orderData.order_id, 'pay_pub_demo_' + Date.now(), 'demo_sig', email, phone, password, bizName, plan);
@@ -1417,7 +1439,7 @@
                     errDiv.classList.remove('hidden');
                   }
                 }
-                if (submitBtn) submitBtn.innerText = 'Proceed to Razorpay Payment →';
+                refreshGST();
               };
             }
 
