@@ -126,6 +126,71 @@ router.post('/admin/approve-account', async (req, res) => {
   }
 });
 
+// POST /api/v1/payments/admin/create-manual-account
+// Create account directly for offline/cash customers (no pending record needed)
+router.post('/admin/create-manual-account', async (req, res) => {
+  try {
+    const { email, password, phone, business_name, plan, amount, order_id } = req.body;
+    const bcrypt = (await import('bcryptjs')).default;
+
+    const cleanEmail = (email || '').trim().toLowerCase();
+    const cleanPhone = (phone  || '').trim();
+    const cleanBiz   = (business_name || '').trim();
+
+    if (!cleanEmail || !password) {
+      return res.status(400).json({ error: 'bad_request', message: 'Email and password are required' });
+    }
+
+    // Hash password
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    // Resolve plan
+    const selectedPlan = PLANS[plan] || PLANS['1_month'];
+    const intervalStr  = `${selectedPlan.durationMonths} months`;
+
+    // Create user
+    const userRes = await query(
+      `INSERT INTO users (email, password_hash, subscription_plan, subscription_expires_at)
+       VALUES ($1, $2, $3, NOW() + INTERVAL '${intervalStr}')
+       RETURNING id, email`,
+      [cleanEmail, passwordHash, plan || '1_month']
+    );
+    const user = userRes.rows[0];
+
+    // Create business profile
+    if (cleanBiz) {
+      const slug = cleanBiz.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      await query(
+        `INSERT INTO businesses (user_id, name, category, slug, google_review_link)
+         VALUES ($1, $2, 'General', $3, 'https://search.google.com/local/writereview')`,
+        [user.id, cleanBiz, slug + '-' + user.id]
+      );
+    }
+
+    // Log in pending_accounts for record-keeping
+    const manualOrderId = order_id || `manual_${Date.now()}`;
+    await query(
+      `INSERT INTO pending_accounts (email, phone, password, business_name, plan, amount, order_id, status)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, 'approved')`,
+      [cleanEmail, cleanPhone, password, cleanBiz, plan || '1_month', amount || 0, manualOrderId]
+    );
+
+    return res.status(200).json({
+      status:   'success',
+      user_id:  user.id,
+      message:  `Manual account created for ${cleanEmail}`,
+      credentials: { email: cleanEmail, password, plan: selectedPlan.name }
+    });
+
+  } catch (err) {
+    console.error('Create manual account error:', err);
+    if (err.code === '23505') {
+      return res.status(409).json({ error: 'duplicate', message: 'An account with this email already exists.' });
+    }
+    return res.status(500).json({ error: 'server_error', message: 'Failed to create manual account' });
+  }
+});
+
 // GET /api/v1/payments/status - Get current user subscription status
 router.get('/status', async (req, res) => {
   try {

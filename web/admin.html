@@ -84,7 +84,7 @@
   <!-- Controls -->
   <div class="flex flex-wrap items-center justify-between gap-3">
     <h2 class="font-heading font-bold text-white text-xl">Pending Accounts</h2>
-    <div class="flex items-center gap-2">
+    <div class="flex items-center gap-2 flex-wrap">
       <select id="filter-status" onchange="loadAccounts()" class="bg-slate-800 border border-slate-700 text-sm text-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:border-amber-500">
         <option value="paid_pending_manual_approval">Awaiting Approval</option>
         <option value="approved">Approved</option>
@@ -95,6 +95,9 @@
       </button>
       <button onclick="exportCSV()" class="bg-emerald-700 hover:bg-emerald-600 text-white text-sm px-4 py-2 rounded-xl transition">
         ⬇ Export CSV
+      </button>
+      <button onclick="openManualModal()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 text-sm font-bold px-4 py-2 rounded-xl transition flex items-center gap-1.5">
+        ➕ New Manual Account
       </button>
     </div>
   </div>
@@ -177,10 +180,99 @@
   </div>
 </div>
 
+<!-- ── MANUAL ACCOUNT MODAL ───────────────────────────────────────────── -->
+<div id="manual-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm items-center justify-center p-4" style="display:none">
+  <div class="glass rounded-3xl p-6 w-full max-w-lg space-y-5 fade-in max-h-[90vh] overflow-y-auto">
+    <div class="flex items-center justify-between">
+      <h3 class="font-heading font-bold text-white text-lg">➕ Create Manual Account</h3>
+      <button onclick="closeManualModal()" class="text-slate-400 hover:text-white text-xl">✕</button>
+    </div>
+    <p class="text-xs text-slate-400">Use for customers who paid <strong class="text-amber-300">offline (cash / UPI / bank transfer)</strong> and need an account created manually.</p>
+
+    <!-- Customer Details -->
+    <div class="space-y-3">
+      <div class="text-xs font-bold text-slate-300 uppercase tracking-wider">Customer Details</div>
+      <div class="grid grid-cols-2 gap-2">
+        <div class="space-y-1">
+          <label class="text-xs text-slate-400">Phone / WhatsApp *</label>
+          <input id="m-phone" type="tel" placeholder="9876543210" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500" />
+        </div>
+        <div class="space-y-1">
+          <label class="text-xs text-slate-400">Customer Name</label>
+          <input id="m-name" type="text" placeholder="John Doe" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500" oninput="autoFillManual()" />
+        </div>
+      </div>
+      <div class="space-y-1">
+        <label class="text-xs text-slate-400">Business Name *</label>
+        <input id="m-biz" type="text" placeholder="John's Cafe" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500" oninput="autoFillManual()" />
+      </div>
+      <div class="grid grid-cols-2 gap-2">
+        <div class="space-y-1">
+          <label class="text-xs text-slate-400">Plan *</label>
+          <select id="m-plan" class="w-full bg-slate-800 border border-slate-700 text-sm text-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:border-amber-500">
+            <option value="1_month">1 Month — ₹1,000</option>
+            <option value="6_months" selected>6 Months — ₹4,000</option>
+            <option value="12_months">12 Months — ₹5,000</option>
+          </select>
+        </div>
+        <div class="space-y-1">
+          <label class="text-xs text-slate-400">Amount Collected (₹)</label>
+          <input id="m-amount" type="number" placeholder="4000" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Generated Credentials -->
+    <div class="space-y-3">
+      <div class="flex items-center justify-between">
+        <div class="text-xs font-bold text-slate-300 uppercase tracking-wider">Login Credentials</div>
+        <button onclick="autoFillManual(true)" class="text-[10px] bg-amber-900/50 text-amber-300 border border-amber-700/50 px-2 py-1 rounded-lg hover:bg-amber-900 transition">⚡ Auto-Generate Both</button>
+      </div>
+
+      <div class="space-y-1">
+        <label class="text-xs text-slate-400">Login Email *</label>
+        <div class="flex gap-2">
+          <input id="m-email" type="email" placeholder="customer@gmail.com" class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500" oninput="updateManualWhatsApp()" />
+          <button onclick="suggestEmail()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 px-3 py-2 rounded-xl text-xs transition whitespace-nowrap">💡 Suggest</button>
+        </div>
+        <p class="text-[10px] text-slate-500">Best: use customer's real Gmail. Or click Suggest to generate one.</p>
+      </div>
+
+      <div class="space-y-1">
+        <label class="text-xs text-slate-400">Password</label>
+        <div class="flex gap-2">
+          <input id="m-pass" type="text" placeholder="Auto-generated password" class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white font-mono placeholder-slate-500 focus:outline-none focus:border-amber-500" oninput="updateManualWhatsApp()" />
+          <button onclick="generateManualPassword()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 px-3 py-2 rounded-xl text-xs transition whitespace-nowrap">🔄 New</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- WhatsApp Preview -->
+    <div class="space-y-2">
+      <div class="text-xs font-bold text-slate-300 uppercase tracking-wider">WhatsApp Message (ready to send)</div>
+      <div class="bg-emerald-950/40 border border-emerald-800/40 rounded-2xl p-4">
+        <pre id="manual-wa-preview" class="text-xs text-emerald-200 whitespace-pre-wrap leading-relaxed font-mono"></pre>
+      </div>
+      <button onclick="copyManualWhatsApp()" class="copy-btn w-full bg-emerald-700 hover:bg-emerald-600 text-white text-sm font-bold py-2.5 rounded-xl transition">📋 Copy WhatsApp Message</button>
+    </div>
+
+    <div id="manual-sheets-status" class="hidden text-xs text-center py-1 rounded-lg font-medium"></div>
+    <div id="manual-err" class="hidden text-xs text-center py-2 rounded-lg font-medium bg-rose-900/40 text-rose-300 border border-rose-800/40"></div>
+
+    <div class="flex gap-2 pt-1">
+      <button onclick="closeManualModal()" class="flex-1 border border-slate-600 text-slate-300 py-3 rounded-xl text-sm hover:bg-slate-800 transition">Cancel</button>
+      <button onclick="submitManualAccount()" id="manual-approve-btn" class="flex-1 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3 rounded-xl text-sm transition">
+        ✅ Create Account
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- ── TOAST ───────────────────────────────────────────────────────── -->
 <div id="toast" class="fixed bottom-6 right-6 z-[999] hidden">
   <div class="glass rounded-2xl px-5 py-3 text-sm font-semibold text-white shadow-2xl fade-in" id="toast-text"></div>
 </div>
+
 
 <script>
 // ── CONFIG ──────────────────────────────────────────────────────────
@@ -509,10 +601,174 @@ document.getElementById('approve-modal').addEventListener('click', (e) => {
   if (e.target === e.currentTarget) closeModal();
 });
 
+document.getElementById('manual-modal').addEventListener('click', (e) => {
+  if (e.target === e.currentTarget) closeManualModal();
+});
+
 // Login on Enter key
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Enter' && !adminToken) doAdminLogin();
 });
+
+// ── MANUAL ACCOUNT MODAL JS ───────────────────────────────────────────
+
+function openManualModal() {
+  // Reset fields
+  ['m-phone','m-name','m-biz','m-email','m-pass','m-amount'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('m-plan').value = '6_months';
+  document.getElementById('manual-wa-preview').innerText = '';
+  document.getElementById('manual-err').classList.add('hidden');
+  document.getElementById('manual-sheets-status').classList.add('hidden');
+  // Auto-generate a password straight away
+  generateManualPassword();
+  document.getElementById('manual-modal').style.display = 'flex';
+}
+
+function closeManualModal() {
+  document.getElementById('manual-modal').style.display = 'none';
+}
+
+// Suggest an email based on business name
+function suggestEmail() {
+  const biz   = (document.getElementById('m-biz').value || '').trim();
+  const phone = (document.getElementById('m-phone').value || '').trim();
+  if (!biz && !phone) { showToast('⚠️ Enter business name or phone first'); return; }
+
+  const slug  = biz.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 12);
+  const num   = phone.slice(-4) || Math.floor(1000 + Math.random() * 9000);
+  const domains = ['gmail.com', 'gmail.com', 'outlook.com'];
+  const domain  = domains[Math.floor(Math.random() * domains.length)];
+  const suggested = slug ? `${slug}${num}@${domain}` : `user${num}@${domain}`;
+
+  document.getElementById('m-email').value = suggested;
+  updateManualWhatsApp();
+  showToast('💡 Email suggested! Ask the customer for their real Gmail if possible.');
+}
+
+function generateManualPassword() {
+  const biz  = (document.getElementById('m-biz').value || 'User').replace(/\s+/g,'').slice(0, 6);
+  const year = new Date().getFullYear();
+  const syms = ['@','#','!','$'];
+  const sym  = syms[Math.floor(Math.random() * syms.length)];
+  const num  = Math.floor(100 + Math.random() * 900);
+  document.getElementById('m-pass').value = `${biz}${sym}${year}${num}`;
+  updateManualWhatsApp();
+}
+
+// Auto-fill email + password when business name is typed
+function autoFillManual(force = false) {
+  const passEl  = document.getElementById('m-pass');
+  const emailEl = document.getElementById('m-email');
+  if (force || !passEl.value)  generateManualPassword();
+  if (force || !emailEl.value) suggestEmail();
+  updateManualWhatsApp();
+}
+
+function updateManualWhatsApp() {
+  const email = document.getElementById('m-email').value || '—';
+  const pass  = document.getElementById('m-pass').value  || '—';
+  const biz   = document.getElementById('m-biz').value   || 'Your Business';
+  const plan  = formatPlan(document.getElementById('m-plan').value);
+
+  document.getElementById('manual-wa-preview').innerText =
+`Hi! 👋
+
+Your *RevmeAI* account is now *ACTIVE!* 🎉
+
+Here are your login details:
+
+🌐 *Login URL:* https://rev.scalezix.com
+📧 *Email:* ${email}
+🔑 *Password:* ${pass}
+📦 *Plan:* ${plan}
+🏢 *Business:* ${biz}
+
+*Next Steps:*
+1️⃣ Login at rev.scalezix.com
+2️⃣ Go to Dashboard → Business Profile
+3️⃣ Add your Google Review link
+4️⃣ Download your QR Code
+5️⃣ Place QR at your counter
+
+Need help? WhatsApp us anytime!
+— *Strs Inc Team* ✨`;
+}
+
+function copyManualWhatsApp() {
+  const text = document.getElementById('manual-wa-preview').innerText;
+  navigator.clipboard.writeText(text).then(() => showToast('✅ WhatsApp message copied!'));
+}
+
+async function submitManualAccount() {
+  const phone  = (document.getElementById('m-phone').value || '').trim();
+  const biz    = (document.getElementById('m-biz').value   || '').trim();
+  const email  = (document.getElementById('m-email').value || '').trim();
+  const pass   = (document.getElementById('m-pass').value  || '').trim();
+  const plan   = document.getElementById('m-plan').value;
+  const amount = document.getElementById('m-amount').value || 0;
+  const errEl  = document.getElementById('manual-err');
+  const btn    = document.getElementById('manual-approve-btn');
+
+  errEl.classList.add('hidden');
+
+  if (!phone || !biz || !email || !pass) {
+    errEl.innerText = '⚠️ Phone, Business Name, Email and Password are required.';
+    errEl.classList.remove('hidden');
+    return;
+  }
+
+  btn.disabled  = true;
+  btn.innerText = 'Creating account...';
+
+  try {
+    // Step 1: Insert a pending_accounts row via the public order endpoint (minimal data)
+    // We use a fake order_id for manual/offline payments
+    const fakeOrderId = `manual_${Date.now()}`;
+
+    // Step 2: Use the approve-account API with manual details
+    // First insert a pending record manually via a helper endpoint
+    // Since we don't have a direct "create pending" API, we use approve-account
+    // with a synthetic pending_id by creating via the DB.
+    // Workaround: POST to admin/create-manual-account
+    const res = await fetch(`${API_BASE}/payments/admin/create-manual-account`, {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + adminToken, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email, password: pass, phone, business_name: biz,
+        plan, amount: Number(amount), order_id: fakeOrderId
+      })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Failed to create account');
+
+    // Step 3: Sync to Google Sheets
+    await syncToSheets({
+      id:            data.user_id || 'manual',
+      phone,
+      email,
+      password:      pass,
+      business_name: biz,
+      plan:          formatPlan(plan),
+      amount,
+      payment_id:    fakeOrderId,
+      approved_at:   new Date().toLocaleString('en-IN'),
+      whatsapp_msg:  document.getElementById('manual-wa-preview').innerText
+    });
+
+    showToast('✅ Account created! Copy the WhatsApp message and send it.');
+    closeManualModal();
+    loadAccounts();
+  } catch(e) {
+    errEl.innerText = '❌ ' + e.message;
+    errEl.classList.remove('hidden');
+  } finally {
+    btn.disabled  = false;
+    btn.innerText = '✅ Create Account';
+  }
+}
 </script>
 </body>
 </html>
